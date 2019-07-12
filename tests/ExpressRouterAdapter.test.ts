@@ -32,7 +32,7 @@ describe('ExpressRouterAdapter', () => {
 
     await sut.get('/')
       .expect(200)
-      .expect('content-type', /application\/json.*/)
+      .expect('content-type', /^application\/json.*/)
       .expect({ hello: 'world' })
       .then();
   });
@@ -75,8 +75,8 @@ describe('ExpressRouterAdapter', () => {
     class CustomMediaType{
       mediaType = 'application/vnd.custom+json';
 
-      formatForResponse(body){
-        return body;
+      formatForResponse({ hello }, { req, res, tenantId, securityContext}){
+        return { hello, anotherProp: 'yay' };
       };
     }
 
@@ -91,8 +91,15 @@ describe('ExpressRouterAdapter', () => {
       .set('accept', 'application/vnd.custom+json')
       .expect(200)
       .expect(res => assert.ok(res.headers['content-type'].startsWith('application/vnd.custom+json'), `expected ${res.headers['content-type']} to contain application/vnd.custom+json`))
-      .then();
+      .expect({ hello: 'world', anotherProp: 'yay' });
   });
+
+  it('should require the media type...')
+  it('should error if neither are implemeneted...')
+  it('should support returning http response...')
+  it('should formatFromRequest...')
+  it('should custom handler...')
+  it('new, should support passing in req (read a query param)')
 });
 
 function buildSuperTestHarnessForRoute(route){
