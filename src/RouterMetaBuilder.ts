@@ -17,6 +17,7 @@ export interface IControllerParams {
     body?: any;
     model?: any;
     securityContext: any;
+    [key: string]: string;
 }
 
 type RouteHandler = (controllerParams?: IControllerParams) => any;
