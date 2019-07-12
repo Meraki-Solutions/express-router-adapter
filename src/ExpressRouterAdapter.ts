@@ -120,7 +120,7 @@ export class ExpressRouterAdapter {
 
                     if (body) {
                         controllerParams.body = body;
-                        controllerParams.model = requestFormatter.formatter.formatFromRequest(req.body);
+                        controllerParams.model = requestFormatter.formatter.formatFromRequest(req.body, { req });
                     }
 
                     // tslint:disable-next-line no-console
@@ -148,7 +148,7 @@ export class ExpressRouterAdapter {
                     } else if (!responseFormatter) {
                         res.set('wl-debug', 'unable to format response').status(204).send();
                     } else {
-                        const formattedModel = await responseFormatter.formatter.formatForResponse(model);
+                        const formattedModel = await responseFormatter.formatter.formatForResponse(model, { req, res });
                         const mediaType = responseFormatter.formatter.mediaType || 'application/json';
 
                         res.set('content-type', mediaType);
