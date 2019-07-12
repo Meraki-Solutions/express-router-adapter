@@ -46,7 +46,7 @@ describe('ExpressRouterAdapter', () => {
     );
 
     await sut.get('/')
-      .expect('Content-Type', /json/)
+      .expect('content-type', /^application\/json.*/)
       .expect(200)
       .expect({ hello: 'world' });
   });
