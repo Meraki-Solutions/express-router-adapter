@@ -144,7 +144,7 @@ export class ExpressRouterAdapter {
                     if (!model) {
                         res.status(204).send();
                     } else if (model.isHTTPResponse) {
-                        handleHTTPResponseModel({ response: res, model });
+                        await handleHTTPResponseModel({ response: res, model });
                     } else if (!responseFormatter) {
                         res.set('wl-debug', 'unable to format response').status(204).send();
                     } else {
@@ -156,7 +156,7 @@ export class ExpressRouterAdapter {
                             formattedModel :
                             new HTTPResponse({ status: 200, body: formattedModel });
 
-                        return handleHTTPResponseModel({ response: res, model: httpResponse, mediaType });
+                        await handleHTTPResponseModel({ response: res, model: httpResponse, mediaType });
                     }
                 } catch (err) {
                     next(err);
@@ -248,7 +248,11 @@ export class ExpressRouterAdapter {
             return defaultHandler;
         }
 
-        function handleHTTPResponseModel({ response, model, mediaType = 'application/json' }: any): any {
+        async function handleHTTPResponseModel({
+            response,
+            model,
+            mediaType = 'application/json'
+        }: any): Promise<void> {
             response.set('content-type', mediaType);
 
             // TODO: status and no body (consider that body might also need to go through formatter)
@@ -257,7 +261,9 @@ export class ExpressRouterAdapter {
             });
             response.status(model.status);
 
-            if (model.body) {
+            if (model.send) {
+                await model.send({ res: response });
+            } else if (model.body) {
                 response.json(model.body);
             } else {
                 response.send();

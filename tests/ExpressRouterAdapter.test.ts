@@ -50,6 +50,25 @@ describe('ExpressRouterAdapter', () => {
       .expect({ hello: 'world' });
   });
 
+  it('when an http response with a send method is returned, should use that', async () => {
+    const sut = await buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .get(() => ({
+          isHTTPResponse: true,
+          status: 200,
+          async send({ res }) {
+            res.set('X-CUSTOM-HEADER', 'hello world').json({ hello: 'world' });
+          }
+        }))
+    );
+
+    await sut.get('/')
+      .expect(200)
+      .expect({ hello: 'world' })
+      .expect('X-CUSTOM-HEADER', 'hello world');
+  });
 
 });
 
