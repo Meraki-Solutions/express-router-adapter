@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig",
+    "compilerOptions": {
+        "rootDir": ".",
+        "module": "commonjs",
+        "noEmit": true,
+        "lib": [
+            "es6",
+            "dom"
+        ]
+    }
+}

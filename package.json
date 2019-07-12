@@ -1,0 +1,42 @@
+{
+  "name": "@symbiotic/express-router-adapter",
+  "version": "0.0.1",
+  "description": "ExpressRouterAdapter is a library that makes it easy to build evolvable hypermedia APIs using the express framework",
+  "main": "dist/index.js",
+  "repository": "https://github.com/symbioticlabs/express-router-adapter",
+  "homepage": "https://symbioticlabs.github.io/express-router-adapter",
+  "scripts": {
+    "test": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register tests/**/*.test.ts",
+    "test:watch": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register --watch --watch-extensions ts,tsx tests/**/*.test.ts",
+    "build": "rm -rf dist && npm run lint && mkdir -p dist && tsc -d -p tsconfig.json",
+    "build:watch": "rm -rf dist && mkdir -p dist && tsc --watch -p tsconfig.json",
+    "docs:build": "rm -rf docs && typedoc --out docs --exclude '**/index.ts' src",
+    "docs:publish": "npm run docs:build && git checkout gh-pages && cp -R docs/* ./ && rm -rf docs && git add . && git commit -m 'Update docs' && git push origin gh-pages && git checkout master",
+    "lint": "tslint -p tsconfig.json",
+    "prepublishOnly": "npm run test && npm run lint && npm run build"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "rest",
+    "hypermedia",
+    "routing",
+    "accept",
+    "content-type"
+  ],
+  "author": "Symbiotic Labs <team@symbioticlabs.io> (https://www.symbioticlabs.io)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^5.2.6",
+    "assert": "^1.4.1",
+    "mocha": "^6.1.4",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "proper-url-join": "^2.0.1",
+    "tslib": "^1.9.3"
+  }
+}
