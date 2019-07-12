@@ -9,19 +9,29 @@ const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> {
 
 describe('ExpressRouterAdapter', () => {
   it('should 204 when no model is returned', async () => {
-    const app = express();
-    const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
-    sut.adapt({ Router: {
-      hello:  new RouterMetaBuilder()
+    const sut = await buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
         .path('/')
         .allowAnonymous()
         .get(() => {})
-    }, expressApp: app });
+    );
 
-    await request(app)
-      .get('/')
+    sut.get('/')
       .expect(204)
       .then();
   })
 
 });
+
+function buildSuperTestHarnessForRoute(route){
+  return request(buildExpressAppWithRoute(route));
+}
+
+function buildExpressAppWithRoute(route){
+  const app = express();
+  const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
+  sut.adapt({ Router: {
+    route
+  }, expressApp: app });
+  return app;
+}
