@@ -8,26 +8,20 @@ import { Container } from 'aurelia-dependency-injection';
 const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
 
 describe('ExpressRouterAdapter', () => {
-
-  it('Can be constructed', async () => {
-    class HelloWorldRouter{
-      hello = new RouterMetaBuilder()
-        .path('/')
-        .allowAnonymous()
-        .get(() => {
-
-        });
-    }
-
+  it('should 204 when no model is returned', async () => {
     const app = express();
     const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
-    sut.adapt({ Router: HelloWorldRouter, expressApp: app });
+    sut.adapt({ Router: {
+      hello:  new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .get(() => {})
+    }, expressApp: app });
 
     await request(app)
       .get('/')
       .expect(204)
       .then();
-
-  });
+  })
 
 });
