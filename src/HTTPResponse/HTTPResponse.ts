@@ -2,9 +2,16 @@ type Partial<T> = {
     [P in keyof T]?: T[P];
 };
 
-type PartialHTTPResponse = Partial<HTTPResponse>;
+export type PartialHTTPResponse = Partial<HTTPResponse>;
 
-export class HTTPResponse {
+export interface IHTTPResponse {
+    status: number;
+    headers: { [key: string]: string };
+    isHTTPResponse: boolean;
+    body: any;
+}
+
+export class HTTPResponse implements IHTTPResponse {
     status: number;
     headers: { [key: string]: string } = {};
     isHTTPResponse: boolean = true;

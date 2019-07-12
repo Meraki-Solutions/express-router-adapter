@@ -1,6 +1,6 @@
 {
   "name": "@symbiotic/express-router-adapter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ExpressRouterAdapter is a library that makes it easy to build evolvable hypermedia APIs using the express framework",
   "main": "dist/index.js",
   "repository": "https://github.com/symbioticlabs/express-router-adapter",
