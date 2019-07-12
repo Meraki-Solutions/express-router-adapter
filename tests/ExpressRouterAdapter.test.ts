@@ -1,23 +1,31 @@
-import { ExpressRouterAdapter } from '../src';
+import 'reflect-metadata';
+import { ExpressRouterAdapter, RouterMetaBuilder } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
+import { Container } from 'aurelia-dependency-injection';
 
 // tslint:disable max-classes-per-file
-// const mockContainer = { get(): any { return null; } };
-// const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
+const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
 
 describe('ExpressRouterAdapter', () => {
 
   it('Can be constructed', async () => {
-    // const sut = new ExpressRouterAdapter(mockContainer as any, mockSecurityContextProvider);
+    class HelloWorldRouter{
+      hello = new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .get(() => {
 
-    const app = express().use((req, res) => {
-      res.status(200).send();
-    });
+        });
+    }
+
+    const app = express();
+    const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
+    sut.adapt({ Router: HelloWorldRouter, expressApp: app });
 
     await request(app)
       .get('/')
-      .expect(200)
+      .expect(204)
       .then();
 
   });
