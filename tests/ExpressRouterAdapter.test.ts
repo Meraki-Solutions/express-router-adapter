@@ -3,13 +3,14 @@ import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
 import { Container } from 'aurelia-dependency-injection';
+import * as assert from 'assert';
 
 // tslint:disable max-classes-per-file
 const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
 
 describe('ExpressRouterAdapter', () => {
   it('when no model is returned, should 204', async () => {
-    const sut = await buildSuperTestHarnessForRoute(
+    const sut = buildSuperTestHarnessForRoute(
       new RouterMetaBuilder()
         .path('/')
         .allowAnonymous()
@@ -22,7 +23,7 @@ describe('ExpressRouterAdapter', () => {
   });
 
   it('when a body is returned, should 200', async () => {
-    const sut = await buildSuperTestHarnessForRoute(
+    const sut = buildSuperTestHarnessForRoute(
       new RouterMetaBuilder()
         .path('/')
         .allowAnonymous()
@@ -31,7 +32,7 @@ describe('ExpressRouterAdapter', () => {
 
     await sut.get('/')
       .expect(200)
-      .expect('content-type', /application\/json.*/)
+      .expect('content-type', /^application\/json.*/)
       .expect({ hello: 'world' })
       .then();
   });
@@ -70,6 +71,35 @@ describe('ExpressRouterAdapter', () => {
       .expect('X-CUSTOM-HEADER', 'hello world');
   });
 
+  it('given a custom media type, should get the correct media type in the response', async () => {
+    class CustomMediaType{
+      mediaType = 'application/vnd.custom+json';
+
+      formatForResponse({ hello }, { req, res, tenantId, securityContext}){
+        return { hello, anotherProp: 'yay' };
+      };
+    }
+
+    const sut = buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .mediaType(CustomMediaType)
+        .get(() => ({ hello: 'world' }))
+    );
+    await sut.get('/')
+      .set('accept', 'application/vnd.custom+json')
+      .expect(200)
+      .expect(res => assert.ok(res.headers['content-type'].startsWith('application/vnd.custom+json'), `expected ${res.headers['content-type']} to contain application/vnd.custom+json`))
+      .expect({ hello: 'world', anotherProp: 'yay' });
+  });
+
+  it('should require the media type...')
+  it('should error if neither are implemeneted...')
+  it('should support returning http response...')
+  it('should formatFromRequest...')
+  it('should custom handler...')
+  it('new, should support passing in req (read a query param)')
 });
 
 function buildSuperTestHarnessForRoute(route){
