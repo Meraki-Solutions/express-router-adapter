@@ -17,6 +17,10 @@ export interface IControllerParams {
     body?: any;
     model?: any;
     securityContext: any;
+
+    // ControllerParams also includes some unknown string values
+    // from path params (e.g. the key 'bar' is a string on controller params if the path is /foo/:bar)
+    // from any calls to query (e.g. the key 'biz' is a string on controller params if you call query('biz'))
     [key: string]: string;
 }
 
