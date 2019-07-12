@@ -29,12 +29,13 @@
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "assert": "^1.4.1",
+    "express": "^4.0.0",
     "mocha": "^6.1.4",
+    "supertest": "^4.0.2",
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "typedoc": "^0.14.2",
-    "typescript": "^3.4.5",
-    "express": "^4.0.0"
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "aurelia-dependency-injection": "^1.4.2",
