@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ExpressRouterAdapter, RouterMetaBuilder } from '../src';
+import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
 import { Container } from 'aurelia-dependency-injection';
@@ -35,6 +35,21 @@ describe('ExpressRouterAdapter', () => {
       .expect({ hello: 'world' })
       .then();
   });
+
+  it('when an http response with an body is returned, should 200', async () => {
+    const sut = await buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .get(() => new HTTPResponse({ status: 200, body: { hello: 'world' }}))
+    );
+
+    await sut.get('/')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect({ hello: 'world' });
+  });
+
 
 });
 
