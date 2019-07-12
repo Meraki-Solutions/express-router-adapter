@@ -255,7 +255,6 @@ export class ExpressRouterAdapter {
         }: any): Promise<void> {
             response.set('content-type', mediaType);
 
-            // TODO: status and no body (consider that body might also need to go through formatter)
             Object.entries(model.headers || {}).forEach(([headerName, headerValue]) => {
                 response.set(headerName, headerValue);
             });
