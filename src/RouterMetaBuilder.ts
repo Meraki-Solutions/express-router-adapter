@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 /**
  * This builds the necessary state for the ExpressRouterAdapter
  *
@@ -10,7 +12,14 @@
  *      return await opportunityManager.getOpportunitiesByOrganization({ orgId, onOrAfter });
  *  }
  */
-type RouteHandler = (controllerParams?: any) => any;
+export interface IControllerParams {
+    req: Request;
+    body?: any;
+    model?: any;
+    securityContext: any;
+}
+
+type RouteHandler = (controllerParams?: IControllerParams) => any;
 type HTTPVerbSetter = (defaultHandler: RouteHandler) => RouterMetaBuilder;
 
 export class RouterMetaBuilder {

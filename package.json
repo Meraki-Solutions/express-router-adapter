@@ -33,11 +33,15 @@
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "typedoc": "^0.14.2",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "express": "^4.0.0"
   },
   "dependencies": {
     "aurelia-dependency-injection": "^1.4.2",
     "proper-url-join": "^2.0.1",
     "tslib": "^1.9.3"
+  },
+  "peerDependencies": {
+    "express": "^4.0.0"
   }
 }
