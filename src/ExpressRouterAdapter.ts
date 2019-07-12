@@ -251,9 +251,11 @@ export class ExpressRouterAdapter {
         async function handleHTTPResponseModel({
             response,
             model,
-            mediaType = 'application/json'
+            mediaType
         }: any): Promise<void> {
-            response.set('content-type', mediaType);
+            if (mediaType) {
+                response.set('content-type', mediaType);
+            }
 
             Object.entries(model.headers || {}).forEach(([headerName, headerValue]) => {
                 response.set(headerName, headerValue);
