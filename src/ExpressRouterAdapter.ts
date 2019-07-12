@@ -1,7 +1,7 @@
 // tslint:disable max-classes-per-file no-null-keyword
 import * as properUrlJoin from 'proper-url-join';
 import { Container } from 'aurelia-dependency-injection';
-import { HTTPError } from './HTTPResponse';
+import { HTTPResponse, HTTPError } from './HTTPResponse';
 
 const isAcceptableMediaType = (mediaType, req) => {
     // req might say to accept anything, which will cause it to accept the first only listed above
@@ -149,16 +149,14 @@ export class ExpressRouterAdapter {
                         res.set('wl-debug', 'unable to format response').status(204).send();
                     } else {
                         const formattedModel = await responseFormatter.formatter.formatForResponse(model, { req, res });
-                        const mediaType = responseFormatter.formatter.mediaType || 'application/json';
+                        const { isHTTPResponse = false } = formattedModel;
+                        const { mediaType } = responseFormatter.formatter;
 
-                        res.set('content-type', mediaType);
+                        const httpResponse = isHTTPResponse ?
+                            formattedModel :
+                            new HTTPResponse({ status: 200, body: formattedModel });
 
-                        if (formattedModel.isHTTPResponse) {
-                            return handleHTTPResponseModel({ response: res, model: formattedModel });
-                        }
-
-                        // we could use a request header to trigger not prettifying the JS, but not worth it yet...
-                        res.send(JSON.stringify(formattedModel));
+                        return handleHTTPResponseModel({ response: res, model: httpResponse, mediaType });
                     }
                 } catch (err) {
                     next(err);
@@ -250,10 +248,8 @@ export class ExpressRouterAdapter {
             return defaultHandler;
         }
 
-        function handleHTTPResponseModel({ response, model }: any): any {
-            if (model.handle) {
-                return model.handle(response);
-            }
+        function handleHTTPResponseModel({ response, model, mediaType = 'application/json' }: any): any {
+            response.set('content-type', mediaType);
 
             // TODO: status and no body (consider that body might also need to go through formatter)
             Object.entries(model.headers || {}).forEach(([headerName, headerValue]) => {

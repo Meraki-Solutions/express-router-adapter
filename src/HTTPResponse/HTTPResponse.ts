@@ -1,9 +1,3 @@
-type Partial<T> = {
-    [P in keyof T]?: T[P];
-};
-
-export type PartialHTTPResponse = Partial<HTTPResponse>;
-
 export interface IHTTPResponse {
     status: number;
     headers: { [key: string]: string };
@@ -13,11 +7,17 @@ export interface IHTTPResponse {
 
 export class HTTPResponse implements IHTTPResponse {
     status: number;
-    headers: { [key: string]: string } = {};
+    headers: { [key: string]: string };
     isHTTPResponse: boolean = true;
     body: any;
 
-    constructor(properties: PartialHTTPResponse) {
-        Object.assign(this, properties);
+    constructor({ status, headers, body }: {
+        status: number,
+        headers?: { [key: string]: string },
+        body?: any
+    }) {
+        this.status = status;
+        this.headers = headers;
+        this.body = body;
     }
 }

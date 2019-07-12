@@ -1,6 +1,6 @@
-import { IHTTPResponse, PartialHTTPResponse } from './HTTPResponse';
+import { IHTTPResponse } from './HTTPResponse';
 
-type PartialHTTPError = PartialHTTPResponse & {
+type PartialHTTPError = IHTTPResponse & {
   message: string;
 };
 
@@ -10,9 +10,16 @@ export class HTTPError extends Error implements IHTTPResponse {
     isHTTPResponse: boolean = true;
     body: any;
 
-    constructor({ message, ...rest }: PartialHTTPError) {
+    constructor({ message, status, headers, body }: {
+        message: string,
+        status: number,
+        headers?: { [key: string]: string },
+        body?: any
+    }) {
         super(message);
-        Object.assign(this, rest);
+        this.status = status;
+        this.headers = headers;
+        this.body = body;
     }
 
 }
