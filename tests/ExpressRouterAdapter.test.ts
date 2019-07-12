@@ -8,7 +8,7 @@ import { Container } from 'aurelia-dependency-injection';
 const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
 
 describe('ExpressRouterAdapter', () => {
-  it('should 204 when no model is returned', async () => {
+  it('when no model is returned, should 204', async () => {
     const sut = await buildSuperTestHarnessForRoute(
       new RouterMetaBuilder()
         .path('/')
@@ -16,10 +16,25 @@ describe('ExpressRouterAdapter', () => {
         .get(() => {})
     );
 
-    sut.get('/')
+    await sut.get('/')
       .expect(204)
       .then();
-  })
+  });
+
+  it('when a body is returned, should 200', async () => {
+    const sut = await buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .get(() => ({ hello: 'world' }))
+    );
+
+    await sut.get('/')
+      .expect(200)
+      .expect('content-type', /application\/json.*/)
+      .expect({ hello: 'world' })
+      .then();
+  });
 
 });
 
