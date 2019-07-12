@@ -1,5 +1,6 @@
 // tslint:disable max-classes-per-file no-null-keyword
 import * as properUrlJoin from 'proper-url-join';
+import { Container } from 'aurelia-dependency-injection';
 
 class RouterError extends Error {
     public statusCode: number;
@@ -24,14 +25,10 @@ type Partial<T> = {
 
 type PartialRouterError = Partial<RouterError>;
 
-type errorCreator = (properties: any) => Error;
+export class ErrorFactory {
 
-const defaultCreateError = (properties: PartialRouterError) => new RouterError(properties);
+    createError = (properties: any): Error =>  new RouterError(properties);
 
-class Container {
-    get(key: any): any {
-        throw new Error('Must override container and provide a get method.');
-    }
 }
 
 const isAcceptableMediaType = (mediaType, req) => {
@@ -103,12 +100,12 @@ export class SecurityContextProvider implements ISecurityContextProvider {
  * Ideally it would still go through Accept formatting.
  */
 export class ExpressRouterAdapter {
-    static inject: any = [Container, SecurityContextProvider];
+    static inject: any = [Container, SecurityContextProvider, ErrorFactory];
 
     constructor(
         private ioc: Container,
         private securityContextProvider: SecurityContextProvider,
-        private createError: errorCreator = defaultCreateError
+        private errorFactory: ErrorFactory
     ) {}
 
     adapt = ({ Router, expressApp, basePath}: any) => {
@@ -163,7 +160,7 @@ export class ExpressRouterAdapter {
 
                     const securityContext = await securityContextProvider.getSecurityContext({ req });
                     if (!allowAnonymous && (!securityContext || !securityContext.principal)) {
-                        throw this.createError({
+                        throw this.errorFactory.createError({
                             statusCode: 401,
                             message: 'Authorization is required'
                         });
@@ -224,11 +221,11 @@ export class ExpressRouterAdapter {
         function validateCanProcessRequest({ req, body, requestFormatter, requestFormatters, responseFormatter, responseFormatters, handler }: any): any {
             if (body && !requestFormatter && requestFormatters.length === 0) {
                 // tslint:disable-next-line max-line-length
-                throw this.createError({ statusCode: 500, message: 'This route is not configured to support Content-Type requests. It must have at least one MediaType with a `formatFromRequest` method, or no MediaTypes to get the default pass through behavior.' });
+                throw this.errorFactory.createError({ statusCode: 500, message: 'This route is not configured to support Content-Type requests. It must have at least one MediaType with a `formatFromRequest` method, or no MediaTypes to get the default pass through behavior.' });
             }
             if (body && !requestFormatter) {
                 // tslint:disable-next-line max-line-length
-                throw this.createError({ statusCode: 415, message: `The provided Content-Type ${req.headers['content-type']} is not supported. Try one of the supported media types: ${requestFormatters.map((mt) => mt.formatter.mediaType).join(', ')}` });
+                throw this.errorFactory.createError({ statusCode: 415, message: `The provided Content-Type ${req.headers['content-type']} is not supported. Try one of the supported media types: ${requestFormatters.map((mt) => mt.formatter.mediaType).join(', ')}` });
             }
             const isGetRequest = req.method === 'GET';
 
@@ -237,17 +234,17 @@ export class ExpressRouterAdapter {
             // tslint:disable-next-line max-line-length
             if (isGetRequest && !responseFormatter && responseFormatters.length === 0) {
                 // tslint:disable-next-line max-line-length
-                throw this.createError({ statusCode: 500, message: 'This route is not configured to support Accept responses. It must have at least one MediaType with a `formatForResponse` method to support responses, or no MediaTypes to get the default pass through behavior.' });
+                throw this.errorFactory.createError({ statusCode: 500, message: 'This route is not configured to support Accept responses. It must have at least one MediaType with a `formatForResponse` method to support responses, or no MediaTypes to get the default pass through behavior.' });
             }
 
             if (isGetRequest && !responseFormatter) {
                 // tslint:disable-next-line max-line-length
-                throw this.createError({ statusCode: 406, message: `The requested Accept format cannot be satisfied. Try one of the supported media types: ${responseFormatters.map((mt) => mt.formatter.mediaType).join(', ')}` });
+                throw this.errorFactory.createError({ statusCode: 406, message: `The requested Accept format cannot be satisfied. Try one of the supported media types: ${responseFormatters.map((mt) => mt.formatter.mediaType).join(', ')}` });
             }
 
             if (!handler) {
                 // tslint:disable-next-line max-line-length
-                throw this.createError({ statusCode: 500, message: 'This route is not configured properly. It must have a default handler or handlers provided with each of the media types' });
+                throw this.errorFactory.createError({ statusCode: 500, message: 'This route is not configured properly. It must have a default handler or handlers provided with each of the media types' });
             }
         }
 

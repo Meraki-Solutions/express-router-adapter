@@ -36,6 +36,7 @@
     "typescript": "^3.4.5"
   },
   "dependencies": {
+    "aurelia-dependency-injection": "^1.4.2",
     "proper-url-join": "^2.0.1",
     "tslib": "^1.9.3"
   }
