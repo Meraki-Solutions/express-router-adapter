@@ -171,6 +171,7 @@ export class ExpressRouterAdapter {
 
             const formatterInstances = mediaTypeFormatters.map(({ formatter: MediaTypeFormatter, handler }) => {
                 const formatter = ioc.get(MediaTypeFormatter);
+                assertValidFormatter(formatter);
                 return { formatter, handler };
             });
             const requestFormatters = formatterInstances.filter(
@@ -181,6 +182,18 @@ export class ExpressRouterAdapter {
             );
 
             return { requestFormatters, responseFormatters };
+        }
+
+        function assertValidFormatter(formatter) {
+            if (typeof formatter.formatFromRequest === 'function') {
+                return;
+            }
+            if (typeof formatter.formatForResponse === 'function') {
+                return;
+            }
+
+            // tslint:disable-next-line max-line-length
+            throw new Error(`Formatters must implement formatFromRequest or formatForResponse but ${formatter.constructor.name} has neither.`);
         }
 
         // tslint:disable-next-line max-line-length

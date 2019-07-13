@@ -90,12 +90,29 @@ describe('ExpressRouterAdapter', () => {
     await sut.get('/')
       .set('accept', 'application/vnd.custom+json')
       .expect(200)
+      // tslint:disable-next-line max-line-length
       .expect(res => assert.ok(res.headers['content-type'].startsWith('application/vnd.custom+json'), `expected ${res.headers['content-type']} to contain application/vnd.custom+json`))
       .expect({ hello: 'world', anotherProp: 'yay' });
   });
 
-  it('should require the media type...')
-  it('should error if neither are implemeneted...')
+  // Not sure what this test would be. mediaType property is not currently required on media formatters
+  // It defaults it application/json
+  it('should require the media type...');
+
+  it('should error if both formatFromRequest and formatForResponse are missing', async () => {
+    assert.throws(() => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeNoMethods {
+            // missing formatFromRequest AND formatForResponse
+          })
+          .get(() => ({ hello: 'world' }))
+      );
+    });
+  });
+
   it('should support returning http response...')
   it('should formatFromRequest...')
   it('should custom handler...')
