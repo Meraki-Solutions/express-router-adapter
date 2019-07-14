@@ -8,6 +8,7 @@
   "scripts": {
     "test": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register tests/**/*.test.ts",
     "test:watch": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register --watch --watch-extensions ts,tsx tests/**/*.test.ts",
+    "test:coverage": "TS_NODE_PROJECT=tsconfig.test.json nyc mocha -r ts-node/register tests/**/*.test.ts",
     "build": "rm -rf dist && npm run lint && mkdir -p dist && tsc -d -p tsconfig.json",
     "build:watch": "rm -rf dist && mkdir -p dist && tsc --watch -p tsconfig.json",
     "docs:build": "rm -rf docs && typedoc --out docs --exclude '**/index.ts' src",
@@ -32,6 +33,7 @@
     "aurelia-dependency-injection": "^1.4.2",
     "express": "^4.0.0",
     "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "reflect-metadata": "^0.1.13",
     "supertest": "^4.0.2",
     "ts-node": "^8.1.0",
@@ -45,5 +47,21 @@
   },
   "peerDependencies": {
     "express": "^4.0.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   }
 }

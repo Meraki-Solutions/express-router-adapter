@@ -1,3 +1,7 @@
 dist
 node_modules
 docs
+
+# nyc test coverage
+coverage
+.nyc_output
