@@ -71,29 +71,43 @@ describe('ExpressRouterAdapter', () => {
       .expect('X-CUSTOM-HEADER', 'hello world');
   });
 
-  it('given a custom media type, should get the correct media type in the response', async () => {
-    class CustomMediaType{
-      mediaType = 'application/vnd.custom+json';
+  describe('given a custom media type', () => {
+    let sut;
 
-      formatForResponse({ hello }, { req, res, tenantId, securityContext}){
-        return { hello, anotherProp: 'yay' };
-      };
-    }
+    beforeEach(() => {
+      class CustomMediaType{
+        mediaType = 'application/vnd.custom+json';
 
-    const sut = buildSuperTestHarnessForRoute(
-      new RouterMetaBuilder()
-        .path('/')
-        .allowAnonymous()
-        .mediaType(CustomMediaType)
-        .get(() => ({ hello: 'world' }))
-    );
-    await sut.get('/')
-      .set('accept', 'application/vnd.custom+json')
-      .expect(200)
-      // tslint:disable-next-line max-line-length
-      .expect(res => assert.ok(res.headers['content-type'].startsWith('application/vnd.custom+json'), `expected ${res.headers['content-type']} to contain application/vnd.custom+json`))
-      .expect({ hello: 'world', anotherProp: 'yay' });
+        formatForResponse({ hello }, { req, res, tenantId, securityContext}){
+          return { hello, anotherProp: 'yay' };
+        };
+      }
+
+      sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(CustomMediaType)
+          .get(() => ({ hello: 'world' }))
+      );
+    })
+    it('should get the correct media type in the response', async () => {
+      await sut.get('/')
+        .set('accept', 'application/vnd.custom+json')
+        .expect(200)
+        // tslint:disable-next-line max-line-length
+        .expect(res => assert.ok(res.headers['content-type'].startsWith('application/vnd.custom+json'), `expected ${res.headers['content-type']} to contain application/vnd.custom+json`))
+        .expect({ hello: 'world', anotherProp: 'yay' });
+    });
+
+    it.only('should require the custom media type', async () => {
+      await sut.get('/')
+        .set('accept', 'application/json')
+        .expect(406)
+        .then({ some: 'body' });
+    });
   });
+
 
   // Not sure what this test would be. mediaType property is not currently required on media formatters
   // It defaults it application/json
@@ -151,5 +165,10 @@ function buildExpressAppWithRoute(route){
   sut.adapt({ Router: {
     route
   }, expressApp: app });
+
+  // override the default error handler so it doesn't console.log
+  app.use((error, req, res, next) => {
+    res.status(error.status || 500).json(error);
+  });
   return app;
 }
