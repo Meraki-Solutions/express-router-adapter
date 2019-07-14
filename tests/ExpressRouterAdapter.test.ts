@@ -113,7 +113,29 @@ describe('ExpressRouterAdapter', () => {
     });
   });
 
-  it('should support returning http response...')
+  it('should support returning http response from formatter', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeReturnsHTTPResponse {
+            formatForResponse() {
+              return new HTTPResponse({
+                status: 302,
+                headers: {
+                  Location: '/somewhere-else'
+                }
+              });
+            }
+          })
+          .get(() => ({ hello: 'world' }))
+      );
+
+      await sut.get('/')
+        .expect(302)
+        .expect('Location', '/somewhere-else');
+  });
+
   it('should formatFromRequest...')
   it('should custom handler...')
   it('new, should support passing in req (read a query param)')
