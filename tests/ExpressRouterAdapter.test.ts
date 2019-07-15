@@ -75,12 +75,12 @@ describe('ExpressRouterAdapter', () => {
     let sut;
 
     beforeEach(() => {
-      class CustomMediaType{
+      class CustomMediaType {
         mediaType = 'application/vnd.custom+json';
 
-        formatForResponse({ hello }, { req, res, tenantId, securityContext}){
+        formatForResponse({ hello }) {
           return { hello, anotherProp: 'yay' };
-        };
+        }
       }
 
       sut = buildSuperTestHarnessForRoute(
@@ -90,7 +90,8 @@ describe('ExpressRouterAdapter', () => {
           .mediaType(CustomMediaType)
           .get(() => ({ hello: 'world' }))
       );
-    })
+    });
+
     it('should get the correct media type in the response', async () => {
       await sut.get('/')
         .set('accept', 'application/vnd.custom+json')
@@ -107,11 +108,6 @@ describe('ExpressRouterAdapter', () => {
         .then({ some: 'body' });
     });
   });
-
-
-  // Not sure what this test would be. mediaType property is not currently required on media formatters
-  // It defaults it application/json
-  it('should require the media type...');
 
   it('should error if both formatFromRequest and formatForResponse are missing', async () => {
     assert.throws(() => {
@@ -156,6 +152,8 @@ describe('ExpressRouterAdapter', () => {
           .path('/')
           .allowAnonymous()
           .mediaType(class MediaTypeWithFormatFromRequest {
+            mediaType = 'application/vnd.custom+json';
+
             formatFromRequest({ hello }) {
               return { hello: `not-${hello}` };
             }
@@ -176,9 +174,17 @@ describe('ExpressRouterAdapter', () => {
 
       await sut
         .post('/')
+          .set('accept', 'application/vnd.custom+json')
+          .set('content-type', 'application/vnd.custom+json')
           .send({ hello: 'world' })
           .expect(200)
           .expect({ hello: 'not-world' });
+
+      await sut
+        .post('/')
+          .set('accept', 'application/vnd.custom+json')
+          .send({ hello: 'world' })
+          .expect(415);
   });
 
   it('given a media type with a custom handler, should use the handler not the default', async () => {
@@ -288,7 +294,9 @@ function buildSuperTestHarnessForRoute(route){
 
 function buildExpressAppWithRoute(route){
   const app = express();
-  app.use(express.json());
+  app.use(express.json({
+    type: ['application/json', '+json']
+  }));
   const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
   sut.adapt({ Router: {
     route
