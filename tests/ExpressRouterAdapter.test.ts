@@ -100,7 +100,7 @@ describe('ExpressRouterAdapter', () => {
         .expect({ hello: 'world', anotherProp: 'yay' });
     });
 
-    it.only('should require the custom media type', async () => {
+    it('should require the custom media type', async () => {
       await sut.get('/')
         .set('accept', 'application/json')
         .expect(406)
@@ -150,7 +150,37 @@ describe('ExpressRouterAdapter', () => {
         .expect('Location', '/somewhere-else');
   });
 
-  it('should formatFromRequest...')
+  it('given the custom media type and a request body, it should format the body', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeWithFormatFromRequest {
+            formatFromRequest({ hello }) {
+              return { hello: `not-${hello}` };
+            }
+
+            // needed to pass through value from formatFromRequest
+            // otherwise will result in 204 no content
+            formatForResponse({ hello }) {
+              return { hello };
+            }
+
+          })
+          .post(
+            ({ model: { hello } }) => {
+              return { hello };
+            }
+          )
+      );
+
+      await sut
+        .post('/')
+          .send({ hello: 'world' })
+          .expect(200)
+          .expect({ hello: 'not-world' });
+  });
+
   it('should custom handler...')
   it('new, should support passing in req (read a query param)')
 });
@@ -161,6 +191,7 @@ function buildSuperTestHarnessForRoute(route){
 
 function buildExpressAppWithRoute(route){
   const app = express();
+  app.use(express.json());
   const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
   sut.adapt({ Router: {
     route
