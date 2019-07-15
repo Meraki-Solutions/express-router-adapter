@@ -181,7 +181,36 @@ describe('ExpressRouterAdapter', () => {
           .expect({ hello: 'not-world' });
   });
 
-  it('should custom handler...')
+  it('given a media type with a custom handler, should use the handler not the default', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeWithFormatFromRequest {
+            formatFromRequest(passThrough) {
+              return passThrough;
+            }
+
+            formatForResponse(passThrough) {
+              return passThrough;
+            }
+          }, () => {
+            return { message: 'hi from custom media type handler!' };
+          })
+          .get(
+            () => {
+              throw new Error('Default handler was called instead of custom media type handler');
+            }
+          )
+      );
+
+      await sut
+        .get('/')
+          .expect(200)
+          .expect({ message: 'hi from custom media type handler!' });
+
+  });
+
   it('new, should support passing in req (read a query param)')
 });
 
