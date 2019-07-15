@@ -211,7 +211,75 @@ describe('ExpressRouterAdapter', () => {
 
   });
 
-  it('new, should support passing in req (read a query param)')
+  it('formatters can use values from req.query to format responses', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeWithFormatFromRequest {
+            formatForResponse({ hello }, { req } ) {
+              const { uppercase } = req.query;
+              return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
+            }
+
+          })
+          .get(
+            () => {
+              return { hello: 'world' };
+            }
+          )
+      );
+
+      await sut
+        .get('/')
+          .expect(200)
+          .query({ uppercase: '1' })
+          .expect({ hello: 'WORLD' });
+
+      await sut
+        .get('/')
+          .expect(200)
+          .expect({ hello: 'world' });
+  });
+
+  it('formatters can use values from req.query to format requests', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .mediaType(class MediaTypeWithFormatFromRequest {
+            formatFromRequest({ hello }, { req } ) {
+              const { uppercase } = req.query;
+              return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
+            }
+
+            // otherwise will result in 204 no content
+            formatForResponse({ hello }) {
+              return { hello };
+            }
+
+          })
+          .post(
+            ({ model: { hello } }) => {
+              return { hello };
+            }
+          )
+      );
+
+      await sut
+        .post('/')
+          .query({ uppercase: '1' })
+          .send({ hello: 'world' })
+          .expect({ hello: 'WORLD' })
+          .expect(200);
+
+      await sut
+        .post('/')
+          .send({ hello: 'world' })
+          .expect({ hello: 'world' })
+          .expect(200);
+  });
+
 });
 
 function buildSuperTestHarnessForRoute(route){
