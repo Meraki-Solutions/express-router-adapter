@@ -25,7 +25,7 @@ export interface IControllerParams {
 }
 
 type RouteHandler = (controllerParams?: IControllerParams) => any;
-type HTTPVerbSetter = (defaultHandler: RouteHandler) => RouterMetaBuilder;
+type HTTPVerbSetter = (defaultHandler: RouteHandler) => IHTTPRoute;
 
 export interface IHTTPRoute {
     httpVerb: 'get' | 'post' | 'delete' | 'put' | 'patch';
