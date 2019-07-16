@@ -75,19 +75,16 @@ describe('ExpressRouterAdapter', () => {
     let sut;
 
     beforeEach(() => {
-      class CustomMediaType {
-        mediaType = 'application/vnd.custom+json';
-
-        formatForResponse({ hello }) {
-          return { hello, anotherProp: 'yay' };
-        }
-      }
-
       sut = buildSuperTestHarnessForRoute(
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(CustomMediaType)
+          .mediaType({
+            mediaType: 'application/vnd.custom+json',
+            formatForResponse({ hello }) {
+              return { hello, anotherProp: 'yay' };
+            }
+          })
           .get(() => ({ hello: 'world' }))
       );
     });
@@ -115,7 +112,7 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeNoMethods {
+          .mediaType({
             // missing formatFromRequest AND formatForResponse
           })
           .get(() => ({ hello: 'world' }))
@@ -128,7 +125,7 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeReturnsHTTPResponse {
+          .mediaType({
             formatForResponse() {
               return new HTTPResponse({
                 status: 302,
@@ -151,12 +148,12 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeWithFormatFromRequest {
-            mediaType = 'application/vnd.custom+json';
+          .mediaType({
+            mediaType: 'application/vnd.custom+json',
 
             formatFromRequest({ hello }) {
               return { hello: `not-${hello}` };
-            }
+            },
 
             // needed to pass through value from formatFromRequest
             // otherwise will result in 204 no content
@@ -192,10 +189,10 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeWithFormatFromRequest {
+          .mediaType({
             formatFromRequest(passThrough) {
               return passThrough;
-            }
+            },
 
             formatForResponse(passThrough) {
               return passThrough;
@@ -222,12 +219,11 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeWithFormatFromRequest {
+          .mediaType({
             formatForResponse({ hello }, { req } ) {
               const { uppercase } = req.query;
               return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
             }
-
           })
           .get(
             () => {
@@ -253,11 +249,11 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .mediaType(class MediaTypeWithFormatFromRequest {
+          .mediaType({
             formatFromRequest({ hello }, { req } ) {
               const { uppercase } = req.query;
               return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
-            }
+            },
 
             // otherwise will result in 204 no content
             formatForResponse({ hello }) {

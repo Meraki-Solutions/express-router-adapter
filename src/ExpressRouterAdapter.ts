@@ -166,11 +166,10 @@ export class ExpressRouterAdapter {
 
         function prepFormatters({ mediaTypeFormatters }: any): any {
             if (mediaTypeFormatters.length === 0) {
-                mediaTypeFormatters.push({ formatter: PassThroughFormatter });
+                mediaTypeFormatters.push({ formatter: new PassThroughFormatter() });
             }
 
-            const formatterInstances = mediaTypeFormatters.map(({ formatter: MediaTypeFormatter, handler }) => {
-                const formatter = ioc.get(MediaTypeFormatter);
+            const formatterInstances = mediaTypeFormatters.map(({ formatter, handler }) => {
                 assertValidFormatter(formatter);
                 return { formatter, handler };
             });
