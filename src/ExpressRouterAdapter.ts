@@ -76,13 +76,11 @@ export class ExpressRouterAdapter {
 
     constructor(private ioc: Container, private securityContextProvider: SecurityContextProvider) {}
 
-    adapt = ({ Router, expressApp, basePath}: any) => {
+    adapt = ({ routes, expressApp, basePath}: any) => {
         const { ioc, securityContextProvider } = this;
-        const router = ioc.get(Router);
-        for (const key in router) {
-            if (router[key] && typeof router[key].build === 'function') {
-                addRoute(router[key].build());
-            }
+
+        for (const route of routes) {
+            addRoute(route);
         }
 
         function addRoute({

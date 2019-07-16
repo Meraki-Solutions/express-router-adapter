@@ -294,9 +294,10 @@ function buildExpressAppWithRoute(route){
     type: ['application/json', '+json']
   }));
   const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
-  sut.adapt({ Router: {
-    route
-  }, expressApp: app });
+  sut.adapt({
+    routes: [route],
+    expressApp: app
+  });
 
   // override the default error handler so it doesn't console.log
   app.use((error, req, res, next) => {

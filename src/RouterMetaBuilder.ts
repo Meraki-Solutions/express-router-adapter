@@ -43,9 +43,9 @@ export class RouterMetaBuilder {
         verbs.forEach((verb) => {
             this[verb] = (defaultHandler: RouteHandler) => {
                 if (defaultHandler) {
-                    return new RouterMetaBuilder({ ...this.state, verb, defaultHandler });
+                    return new RouterMetaBuilder({ ...this.state, verb, defaultHandler }).build();
                 } else {
-                    return new RouterMetaBuilder({ ...this.state, verb });
+                    return new RouterMetaBuilder({ ...this.state, verb }).build();
                 }
             };
         });
