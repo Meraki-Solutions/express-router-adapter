@@ -1,10 +1,23 @@
-import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse, ExpressRouterAdapterConfig } from '../src';
+import {
+  ExpressRouterAdapter,
+  RouterMetaBuilder,
+  HTTPResponse,
+  ExpressRouterAdapterConfig,
+  SecurityContextProvider
+} from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
 import * as assert from 'assert';
 
 // tslint:disable max-classes-per-file
-const mockSecurityContextProvider = { async getSecurityContext(): Promise<any> { return null; } };
+const mockLog = {
+  info(...params: any) {
+    // do nothing
+  },
+  debug(...params: any) {
+    // do nothing
+  }
+};
 
 describe('ExpressRouterAdapter', () => {
   it('when no model is returned, should 204', async () => {
@@ -298,7 +311,8 @@ function buildExpressAppWithRoute(route) {
     {
       getRoutes: () => [route]
     },
-    mockSecurityContextProvider
+    new SecurityContextProvider(),
+    mockLog
   );
   sut.adapt({
     expressApp: app

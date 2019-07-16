@@ -2,7 +2,9 @@
 import * as properUrlJoin from 'proper-url-join';
 import { HTTPResponse, HTTPError } from './HTTPResponse';
 import { IHTTPRoute } from './RouterMetaBuilder';
-import { RouteProvider } from './RouteProvider';
+import { ISecurityContextProvider, SecurityContextProvider } from './SecurityContext';
+import { IRouteProvider, RouteProvider } from './RouteProvider';
+import { ILog, Log } from './Log';
 
 const isAcceptableMediaType = (mediaType, req) => {
     // req might say to accept anything, which will cause it to accept the first only listed above
@@ -33,16 +35,6 @@ class PassThroughFormatter {
     }
     formatForResponse(model: any): any {
         return model;
-    }
-}
-
-interface ISecurityContextProvider {
-    getSecurityContext({ req: any }: any): Promise<any>;
-}
-
-export class SecurityContextProvider implements ISecurityContextProvider {
-    async getSecurityContext({ req: any }: any): Promise<any> {
-        return {};
     }
 }
 
@@ -84,16 +76,17 @@ export class ExpressRouterAdapterConfig {
  * Ideally it would still go through Accept formatting.
  */
 export class ExpressRouterAdapter {
-    static inject = [ExpressRouterAdapterConfig, RouteProvider, SecurityContextProvider];
+    static inject = [ExpressRouterAdapterConfig, RouteProvider, SecurityContextProvider, Log];
 
     constructor(
         private config: ExpressRouterAdapterConfig,
-        private routeProvider: RouteProvider,
-        private securityContextProvider: SecurityContextProvider
+        private routeProvider: IRouteProvider,
+        private securityContextProvider: ISecurityContextProvider,
+        private log: ILog
     ) {}
 
     adapt = ({ expressApp }: any) => {
-        const { securityContextProvider } = this;
+        const { log, securityContextProvider } = this;
         const { BASE_PATH } = this.config;
 
         this.routeProvider.getRoutes().forEach(addRoute);
@@ -105,12 +98,18 @@ export class ExpressRouterAdapter {
             mediaTypeFormatters = [],
             httpQueryParams = [],
             allowAnonymous = false
-        }: any): any {
+        }: IHTTPRoute): void {
+            log.debug('adding route', httpVerb, httpPath);
 
             const { requestFormatters, responseFormatters } = prepFormatters({ mediaTypeFormatters });
 
             expressApp[httpVerb](properUrlJoin(BASE_PATH, httpPath), async (req, res, next) => {
                 try {
+                    let requestLogMessage = `${req.method} ${req.url}`;
+
+                    log.info(requestLogMessage);
+                    log.debug('headers', req.headers);
+
                     const body = ['PUT', 'PATCH', 'POST'].includes(req.method) ? req.body : null;
 
                     const requestFormatter = getRequestFormatter({ req, requestFormatters, body });
@@ -131,14 +130,18 @@ export class ExpressRouterAdapter {
                     httpQueryParams.forEach((queryKey) => controllerParams[queryKey] = req.query[queryKey]);
 
                     if (body) {
+                        log.debug('body', JSON.stringify(body));
                         controllerParams.body = body;
+
                         controllerParams.model = requestFormatter.formatter.formatFromRequest(req.body, { req });
                     }
 
-                    // tslint:disable-next-line no-console
-                    console.log(req.method, req.url);
-
                     const securityContext = await securityContextProvider.getSecurityContext({ req });
+
+                    requestLogMessage += ` (${securityContext.toLogSafeString()})`;
+
+                    log.info(requestLogMessage);
+
                     if (!allowAnonymous && (!securityContext || !securityContext.principal)) {
                         throw new HTTPError({
                             status: 401,
@@ -166,11 +169,13 @@ export class ExpressRouterAdapter {
 
                         await handleHTTPResponseModel({ response: res, model: httpResponse, mediaType });
                     }
+
+                    log.info(`${res.statusCode} ${requestLogMessage}`);
                 } catch (err) {
                     next(err);
                 }
             });
-        };
+        }
 
         function prepFormatters({ mediaTypeFormatters }: any): any {
             if (mediaTypeFormatters.length === 0) {
