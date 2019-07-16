@@ -1,4 +1,4 @@
-import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse } from '../src';
+import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse, ExpressRouterAdapterConfig } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
 import * as assert from 'assert';
@@ -293,9 +293,13 @@ function buildExpressAppWithRoute(route) {
   app.use(express.json({
     type: ['application/json', '+json']
   }));
-  const sut = new ExpressRouterAdapter({
-    getRoutes: () => [route]
-  }, mockSecurityContextProvider);
+  const sut = new ExpressRouterAdapter(
+    new ExpressRouterAdapterConfig(),
+    {
+      getRoutes: () => [route]
+    },
+    mockSecurityContextProvider
+  );
   sut.adapt({
     expressApp: app
   });

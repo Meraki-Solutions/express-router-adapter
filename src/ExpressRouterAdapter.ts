@@ -46,6 +46,17 @@ export class SecurityContextProvider implements ISecurityContextProvider {
     }
 }
 
+export class ExpressRouterAdapterConfig {
+    BASE_PATH: string = '/';
+
+    constructor(config: any = {}) {
+        Object.assign(
+            this,
+            config
+        );
+    }
+}
+
 /**
  * ExpressRouterAdapter is meant to make RESTful practices easy to implement.
  *
@@ -73,12 +84,17 @@ export class SecurityContextProvider implements ISecurityContextProvider {
  * Ideally it would still go through Accept formatting.
  */
 export class ExpressRouterAdapter {
-    static inject: any = [RouteProvider, SecurityContextProvider];
+    static inject = [ExpressRouterAdapterConfig, RouteProvider, SecurityContextProvider];
 
-    constructor(private routeProvider: RouteProvider, private securityContextProvider: SecurityContextProvider) {}
+    constructor(
+        private config: ExpressRouterAdapterConfig,
+        private routeProvider: RouteProvider,
+        private securityContextProvider: SecurityContextProvider
+    ) {}
 
-    adapt = ({ expressApp, basePath}: any) => {
+    adapt = ({ expressApp }: any) => {
         const { securityContextProvider } = this;
+        const { BASE_PATH } = this.config;
 
         this.routeProvider.getRoutes().forEach(addRoute);
 
@@ -93,7 +109,7 @@ export class ExpressRouterAdapter {
 
             const { requestFormatters, responseFormatters } = prepFormatters({ mediaTypeFormatters });
 
-            expressApp[httpVerb](properUrlJoin(basePath, httpPath), async (req, res, next) => {
+            expressApp[httpVerb](properUrlJoin(BASE_PATH, httpPath), async (req, res, next) => {
                 try {
                     const body = ['PUT', 'PATCH', 'POST'].includes(req.method) ? req.body : null;
 
@@ -154,7 +170,7 @@ export class ExpressRouterAdapter {
                     next(err);
                 }
             });
-        }
+        };
 
         function prepFormatters({ mediaTypeFormatters }: any): any {
             if (mediaTypeFormatters.length === 0) {
