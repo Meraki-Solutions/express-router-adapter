@@ -88,7 +88,6 @@ export class ExpressRouterAdapter {
             httpPath,
             mediaTypeFormatters = [],
             httpQueryParams = [],
-            httpAuthorizers = [],
             allowAnonymous = false
         }: any): any {
 
