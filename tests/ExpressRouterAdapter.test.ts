@@ -12,7 +12,9 @@ describe('ExpressRouterAdapter', () => {
       new RouterMetaBuilder()
         .path('/')
         .allowAnonymous()
-        .get(() => {})
+        .get(() => {
+          // intentionally empty
+        })
     );
 
     await sut.get('/')
