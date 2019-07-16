@@ -12,17 +12,17 @@ import { Request } from 'express';
  *      return await opportunityManager.getOpportunitiesByOrganization({ orgId, onOrAfter });
  *  }
  */
-export interface IControllerParams {
+export interface IBaseControllerParams {
     req: Request;
     body?: any;
     model?: any;
     securityContext: any;
-
-    // ControllerParams also includes some unknown string values
-    // from path params (e.g. the key 'bar' is a string on controller params if the path is /foo/:bar)
-    // from any calls to query (e.g. the key 'biz' is a string on controller params if you call query('biz'))
-    [key: string]: string;
 }
+
+// ControllerParams also includes some unknown string values
+// from path params (e.g. the key 'bar' is a string on controller params if the path is /foo/:bar)
+// from any calls to query (e.g. the key 'biz' is a string on controller params if you call query('biz'))
+export type IControllerParams = IBaseControllerParams & { [key: string]: string; };
 
 type RouteHandler = (controllerParams?: IControllerParams) => any;
 type HTTPVerbSetter = (defaultHandler: RouteHandler) => IHTTPRoute;
