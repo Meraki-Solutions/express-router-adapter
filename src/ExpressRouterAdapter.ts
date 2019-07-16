@@ -1,6 +1,5 @@
 // tslint:disable max-classes-per-file no-null-keyword
 import * as properUrlJoin from 'proper-url-join';
-import { Container } from 'aurelia-dependency-injection';
 import { HTTPResponse, HTTPError } from './HTTPResponse';
 
 const isAcceptableMediaType = (mediaType, req) => {
@@ -72,7 +71,7 @@ export class SecurityContextProvider implements ISecurityContextProvider {
  * Ideally it would still go through Accept formatting.
  */
 export class ExpressRouterAdapter {
-    static inject: any = [Container, SecurityContextProvider];
+    static inject: any = [SecurityContextProvider];
 
     constructor(private securityContextProvider: SecurityContextProvider) {}
 
