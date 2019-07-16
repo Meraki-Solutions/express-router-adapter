@@ -143,6 +143,9 @@ export class ExpressRouterAdapter {
 
                     log.info(requestLogMessage);
 
+                    // Make security context available to error handler
+                    req.expressRouterAdapter = { securityContext };
+
                     if (!allowAnonymous && (!securityContext || !securityContext.principal)) {
                         throw new HTTPError({
                             status: 401,
