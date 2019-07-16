@@ -1,4 +1,5 @@
 // tslint:disable max-classes-per-file no-null-keyword
+import { Application } from 'express';
 import * as properUrlJoin from 'proper-url-join';
 import { HTTPResponse, HTTPError } from './HTTPResponse';
 import { IHTTPRoute } from './RouterMetaBuilder';
@@ -85,7 +86,7 @@ export class ExpressRouterAdapter {
         private log: ILog
     ) {}
 
-    adapt = ({ expressApp }: any) => {
+    applyRoutes = (app: Application) => {
         const { log, securityContextProvider } = this;
         const { BASE_PATH } = this.config;
 
@@ -103,7 +104,7 @@ export class ExpressRouterAdapter {
 
             const { requestFormatters, responseFormatters } = prepFormatters({ mediaTypeFormatters });
 
-            expressApp[httpVerb](properUrlJoin(BASE_PATH, httpPath), async (req, res, next) => {
+            app[httpVerb](properUrlJoin(BASE_PATH, httpPath), async (req, res, next) => {
                 try {
                     let requestLogMessage = `${req.method} ${req.url}`;
 

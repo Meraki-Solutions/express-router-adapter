@@ -314,9 +314,7 @@ function buildExpressAppWithRoute(route) {
     new SecurityContextProvider(),
     mockLog
   );
-  sut.adapt({
-    expressApp: app
-  });
+  sut.applyRoutes(app);
 
   // override the default error handler so it doesn't console.log
   app.use((error, req, res, next) => {
