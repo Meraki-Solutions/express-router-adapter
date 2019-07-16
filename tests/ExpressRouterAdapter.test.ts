@@ -1,8 +1,6 @@
-import 'reflect-metadata';
 import { ExpressRouterAdapter, RouterMetaBuilder, HTTPResponse } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
-import { Container } from 'aurelia-dependency-injection';
 import * as assert from 'assert';
 
 // tslint:disable max-classes-per-file
@@ -293,7 +291,7 @@ function buildExpressAppWithRoute(route){
   app.use(express.json({
     type: ['application/json', '+json']
   }));
-  const sut = new ExpressRouterAdapter(new Container(), mockSecurityContextProvider);
+  const sut = new ExpressRouterAdapter(mockSecurityContextProvider);
   sut.adapt({
     routes: [route],
     expressApp: app

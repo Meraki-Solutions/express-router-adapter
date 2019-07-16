@@ -74,10 +74,10 @@ export class SecurityContextProvider implements ISecurityContextProvider {
 export class ExpressRouterAdapter {
     static inject: any = [Container, SecurityContextProvider];
 
-    constructor(private ioc: Container, private securityContextProvider: SecurityContextProvider) {}
+    constructor(private securityContextProvider: SecurityContextProvider) {}
 
     adapt = ({ routes, expressApp, basePath}: any) => {
-        const { ioc, securityContextProvider } = this;
+        const { securityContextProvider } = this;
 
         for (const route of routes) {
             addRoute(route);
@@ -132,10 +132,6 @@ export class ExpressRouterAdapter {
                         });
                     }
                     controllerParams.securityContext = securityContext;
-
-                    for (const Authorizer of httpAuthorizers) {
-                        await ioc.get(Authorizer).authorize(controllerParams);
-                    }
 
                     const model = await handler(controllerParams);
 

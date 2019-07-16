@@ -59,7 +59,6 @@ export class RouterMetaBuilder {
             httpPath: path,
             mediaTypeFormatters,
             httpQueryParams: queryKeys,
-            httpAuthorizers: authorizers,
             allowAnonymous,
             defaultHandler
         };
@@ -83,10 +82,6 @@ export class RouterMetaBuilder {
 
     query = (...queryKeys: string[]): RouterMetaBuilder => {
         return new RouterMetaBuilder({ ...this.state, queryKeys : [...(this.state.queryKeys || []), ...queryKeys] });
-    }
-
-    authorize = (Authorizer: any): RouterMetaBuilder => {
-        return new RouterMetaBuilder({ ...this.state, authorizers : [...(this.state.authorizers || []), Authorizer] });
     }
 
     allowAnonymous = (): RouterMetaBuilder => {
