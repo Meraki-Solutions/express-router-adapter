@@ -27,6 +27,15 @@ export interface IControllerParams {
 type RouteHandler = (controllerParams?: IControllerParams) => any;
 type HTTPVerbSetter = (defaultHandler: RouteHandler) => RouterMetaBuilder;
 
+export interface IHTTPRoute {
+    httpVerb: 'get' | 'post' | 'delete' | 'put' | 'patch';
+    httpPath: string;
+    mediaTypeFormatters: any;
+    httpQueryParams: string[];
+    allowAnonymous: boolean;
+    defaultHandler?: RouteHandler;
+}
+
 export class RouterMetaBuilder {
     private state: any;
 
@@ -51,8 +60,8 @@ export class RouterMetaBuilder {
         });
     }
 
-    build = () => {
-        const { path, mediaTypeFormatters, verb, queryKeys, authorizers, allowAnonymous, defaultHandler } = this.state;
+    build = (): IHTTPRoute => {
+        const { path, mediaTypeFormatters, verb, queryKeys, allowAnonymous, defaultHandler } = this.state;
 
         return {
             httpVerb: verb,
@@ -68,7 +77,7 @@ export class RouterMetaBuilder {
         return new RouterMetaBuilder({ ...this.state, path });
     }
 
-    mediaType = (MediaTypeFormatter: any, handler?: RouteHandler): RouterMetaBuilder => {
+    mediaType = (mediaTypeFormatter: any, handler?: RouteHandler): RouterMetaBuilder => {
         const mediaTypeFormatters = this.state.mediaTypeFormatters || [];
 
         // we attempted to do this with WeakMap but it isn't practical to clone so we fell back to this
@@ -76,7 +85,7 @@ export class RouterMetaBuilder {
         //  better than that
         return new RouterMetaBuilder({
             ...this.state,
-            mediaTypeFormatters : [ ...mediaTypeFormatters, { formatter: MediaTypeFormatter, handler } ]
+            mediaTypeFormatters : [ ...mediaTypeFormatters, { formatter: mediaTypeFormatter, handler } ]
         });
     }
 

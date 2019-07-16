@@ -1,6 +1,8 @@
 // tslint:disable max-classes-per-file no-null-keyword
 import * as properUrlJoin from 'proper-url-join';
 import { HTTPResponse, HTTPError } from './HTTPResponse';
+import { IHTTPRoute } from './RouterMetaBuilder';
+import { RouteProvider } from './RouteProvider';
 
 const isAcceptableMediaType = (mediaType, req) => {
     // req might say to accept anything, which will cause it to accept the first only listed above
@@ -71,16 +73,14 @@ export class SecurityContextProvider implements ISecurityContextProvider {
  * Ideally it would still go through Accept formatting.
  */
 export class ExpressRouterAdapter {
-    static inject: any = [SecurityContextProvider];
+    static inject: any = [RouteProvider, SecurityContextProvider];
 
-    constructor(private securityContextProvider: SecurityContextProvider) {}
+    constructor(private routeProvider: RouteProvider, private securityContextProvider: SecurityContextProvider) {}
 
-    adapt = ({ routes, expressApp, basePath}: any) => {
+    adapt = ({ expressApp, basePath}: any) => {
         const { securityContextProvider } = this;
 
-        for (const route of routes) {
-            addRoute(route);
-        }
+        this.routeProvider.getRoutes().forEach(addRoute);
 
         function addRoute({
             defaultHandler,

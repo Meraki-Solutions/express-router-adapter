@@ -284,18 +284,19 @@ describe('ExpressRouterAdapter', () => {
 
 });
 
-function buildSuperTestHarnessForRoute(route){
+function buildSuperTestHarnessForRoute(route) {
   return request(buildExpressAppWithRoute(route));
 }
 
-function buildExpressAppWithRoute(route){
+function buildExpressAppWithRoute(route) {
   const app = express();
   app.use(express.json({
     type: ['application/json', '+json']
   }));
-  const sut = new ExpressRouterAdapter(mockSecurityContextProvider);
+  const sut = new ExpressRouterAdapter({
+    getRoutes: () => [route]
+  }, mockSecurityContextProvider);
   sut.adapt({
-    routes: [route],
     expressApp: app
   });
 
