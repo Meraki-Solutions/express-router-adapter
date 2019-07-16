@@ -50,7 +50,7 @@ export class RouterMetaBuilder {
 
         const verbs = ['get', 'post', 'delete', 'put', 'patch'];
         verbs.forEach((verb) => {
-            this[verb] = (defaultHandler: RouteHandler) => {
+            this[verb] = (defaultHandler: RouteHandler): IHTTPRoute => {
                 if (defaultHandler) {
                     return new RouterMetaBuilder({ ...this.state, verb, defaultHandler }).build();
                 } else {
