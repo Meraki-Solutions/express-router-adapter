@@ -106,6 +106,12 @@ export class RouterMetaBuilder {
         return new RouterMetaBuilder({ ...this.state, allowAnonymous : true });
     }
 
+    /**
+     * Set a max timeout for the route, after which a 503 status code will be returned
+     *
+     * @param timeout - The timeout in milliseconds or as a string understood by the ms library
+     * Example: '5m' for 5 minutes, see https://www.npmjs.com/package/ms
+     */
     timeout = (timeout: string | number): RouterMetaBuilder => {
         return new RouterMetaBuilder({ ...this.state, timeout });
     }
