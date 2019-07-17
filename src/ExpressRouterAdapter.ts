@@ -44,7 +44,7 @@ class PassThroughFormatter {
 
 export class ExpressRouterAdapterConfig {
     BASE_PATH: string = '/';
-    TIMEOUT: string | number;
+    TIMEOUT: string | number = '29s';
 
     constructor(config: any = {}) {
         Object.assign(
@@ -124,7 +124,7 @@ export class ExpressRouterAdapter {
                     req.on('timeout', () => next(new HTTPError({
                         status: 503,
                         message: `Request timeout of ${routeTimeout} exceeded`,
-                        // TODO: Add an optional code 'timedout'
+                        code: 'timedout'
                     })));
 
                     const body = ['PUT', 'PATCH', 'POST'].includes(req.method) ? req.body : null;

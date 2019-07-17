@@ -39,7 +39,7 @@ describe('ExpressRouterAdapter', () => {
 
       await sut.get('/')
         .expect(503)
-        .then();
+        .expect(res => assert.equal(res.body.code, 'timedout'));
     });
 
     it('should timeout if exceeds route timeout', async () => {
@@ -60,7 +60,7 @@ describe('ExpressRouterAdapter', () => {
 
       await sut.get('/')
         .expect(503)
-        .then();
+        .expect(res => assert.equal(res.body.code, 'timedout'));
     });
 
   });
