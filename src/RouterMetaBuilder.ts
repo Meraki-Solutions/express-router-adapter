@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { IHTTPResponse } from './HTTPResponse';
 
 /**
  * This builds the necessary state for the ExpressRouterAdapter
@@ -27,10 +28,16 @@ export type IControllerParams = IBaseControllerParams & { [key: string]: string;
 type RouteHandler = (controllerParams?: IControllerParams) => any;
 type HTTPVerbSetter = (defaultHandler: RouteHandler) => IHTTPRoute;
 
+export interface IMediaTypeFormatter {
+    mediaType: string;
+    formatForResponse: (model: any, params: { req: Request }) => IHTTPResponse | any;
+    formatFromRequest: (body: any, params: { req: Request }) => any;
+}
+
 export interface IHTTPRoute {
     httpVerb: 'get' | 'post' | 'delete' | 'put' | 'patch';
     httpPath: string;
-    mediaTypeFormatters: any;
+    mediaTypeFormatters: Array<{ formatter: IMediaTypeFormatter, handler?: RouteHandler }>;
     httpQueryParams: string[];
     allowAnonymous: boolean;
     defaultHandler?: RouteHandler;
@@ -79,7 +86,7 @@ export class RouterMetaBuilder {
         return new RouterMetaBuilder({ ...this.state, path });
     }
 
-    mediaType = (mediaTypeFormatter: any, handler?: RouteHandler): RouterMetaBuilder => {
+    mediaType = (mediaTypeFormatter: IMediaTypeFormatter, handler?: RouteHandler): RouterMetaBuilder => {
         const mediaTypeFormatters = this.state.mediaTypeFormatters || [];
 
         // we attempted to do this with WeakMap but it isn't practical to clone so we fell back to this

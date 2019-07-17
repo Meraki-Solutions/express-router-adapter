@@ -141,6 +141,9 @@ describe('ExpressRouterAdapter', () => {
             mediaType: 'application/vnd.custom+json',
             formatForResponse({ hello }) {
               return { hello, anotherProp: 'yay' };
+            },
+            formatFromRequest(body) {
+              return body;
             }
           })
           .get(() => ({ hello: 'world' }))
@@ -172,7 +175,7 @@ describe('ExpressRouterAdapter', () => {
           .allowAnonymous()
           .mediaType({
             // missing formatFromRequest AND formatForResponse
-          })
+          } as any)
           .get(() => ({ hello: 'world' }))
       );
     });
@@ -184,6 +187,7 @@ describe('ExpressRouterAdapter', () => {
           .path('/')
           .allowAnonymous()
           .mediaType({
+            mediaType: 'application/json',
             formatForResponse() {
               return new HTTPResponse({
                 status: 302,
@@ -191,6 +195,9 @@ describe('ExpressRouterAdapter', () => {
                   Location: '/somewhere-else'
                 }
               });
+            },
+            formatFromRequest(body) {
+              return body;
             }
           })
           .get(() => ({ hello: 'world' }))
@@ -213,8 +220,6 @@ describe('ExpressRouterAdapter', () => {
               return { hello: `not-${hello}` };
             },
 
-            // needed to pass through value from formatFromRequest
-            // otherwise will result in 204 no content
             formatForResponse({ hello }) {
               return { hello };
             }
@@ -248,6 +253,8 @@ describe('ExpressRouterAdapter', () => {
           .path('/')
           .allowAnonymous()
           .mediaType({
+            mediaType: 'application/json',
+
             formatFromRequest(passThrough) {
               return passThrough;
             },
@@ -278,9 +285,13 @@ describe('ExpressRouterAdapter', () => {
           .path('/')
           .allowAnonymous()
           .mediaType({
+            mediaType: 'application/json',
             formatForResponse({ hello }, { req } ) {
               const { uppercase } = req.query;
               return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
+            },
+            formatFromRequest(body) {
+              return body;
             }
           })
           .get(
@@ -308,12 +319,12 @@ describe('ExpressRouterAdapter', () => {
           .path('/')
           .allowAnonymous()
           .mediaType({
+            mediaType: 'application/json',
             formatFromRequest({ hello }, { req } ) {
               const { uppercase } = req.query;
               return { hello: uppercase === '1' ? hello.toUpperCase() : hello };
             },
 
-            // otherwise will result in 204 no content
             formatForResponse({ hello }) {
               return { hello };
             }

@@ -105,7 +105,7 @@ export class ExpressRouterAdapter {
         }: IHTTPRoute): void {
             log.debug('adding route', httpVerb, httpPath);
 
-            const { requestFormatters, responseFormatters } = prepFormatters({ mediaTypeFormatters });
+            const formatters = prepFormatters({ mediaTypeFormatters });
             const routeMiddleware = [];
             const routeTimeout = timeout || GLOBAL_TIMEOUT;
             if (routeTimeout) {
@@ -127,17 +127,17 @@ export class ExpressRouterAdapter {
 
                     const body = ['PUT', 'PATCH', 'POST'].includes(req.method) ? req.body : null;
 
-                    const requestFormatter = getRequestFormatter({ req, requestFormatters, body });
-                    const responseFormatter = getResponseFormatter({ req, responseFormatters });
+                    const requestFormatter = getRequestFormatter({ req, requestFormatters: formatters, body });
+                    const responseFormatter = getResponseFormatter({ req, responseFormatters: formatters });
                     const handler = getHandlerForRequest({ req, defaultHandler, requestFormatter, responseFormatter });
 
                     validateCanProcessRequest({
                         req,
                         body,
                         requestFormatter,
-                        requestFormatters,
+                        requestFormatters: formatters,
                         responseFormatter,
-                        responseFormatters,
+                        responseFormatters: formatters,
                         handler
                     });
 
@@ -172,11 +172,6 @@ export class ExpressRouterAdapter {
 
                     if (!model) {
                         model = new HTTPResponse({ status: 204 });
-                    } else if (!responseFormatter) {
-                        model = new HTTPResponse({
-                            status: 204,
-                            headers: { 'wl-debug': 'unable to format response' }
-                        });
                     } else if (!model.isHTTPResponse) {
                         const formattedModel = await responseFormatter.formatter.formatForResponse(model, { req, res });
                         const { isHTTPResponse = false } = formattedModel;
@@ -213,21 +208,13 @@ export class ExpressRouterAdapter {
                 assertValidFormatter(formatter);
                 return { formatter, handler };
             });
-            const requestFormatters = formatterInstances.filter(
-                mt => typeof mt.formatter.formatFromRequest === 'function'
-            );
-            const responseFormatters = formatterInstances.filter(
-                mt => typeof mt.formatter.formatForResponse === 'function'
-            );
 
-            return { requestFormatters, responseFormatters };
+            return formatterInstances;
         }
 
         function assertValidFormatter(formatter) {
-            if (typeof formatter.formatFromRequest === 'function') {
-                return;
-            }
-            if (typeof formatter.formatForResponse === 'function') {
+            // tslint:disable-next-line max-line-length
+            if (typeof formatter.formatFromRequest === 'function' && typeof formatter.formatForResponse === 'function') {
                 return;
             }
 
