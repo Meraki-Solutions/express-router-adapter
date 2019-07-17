@@ -32,8 +32,6 @@ const isAcceptableContentType = (mediaType, req) => {
 // they are expecting the old schema, not the new one, and it will be difficult to triage
 // compared to seeing someone requesting `application/json` when that is not supported anymore.
 class PassThroughFormatter {
-    mediaType = 'application/json';
-
     formatFromRequest(body: any): any {
         return body;
     }
@@ -183,7 +181,9 @@ export class ExpressRouterAdapter {
                             formattedModel :
                             new HTTPResponse({ status: 200, body: formattedModel });
 
-                        httpResponse.headers['content-type'] = httpResponse.headers['content-type'] || mediaType;
+                        if (!httpResponse.headers['content-type'] && mediaType) {
+                            httpResponse.headers['content-type'] = mediaType;
+                        }
 
                         model = httpResponse;
                     }

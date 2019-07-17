@@ -20,6 +20,41 @@ const mockLog = {
 };
 
 describe('ExpressRouterAdapter', () => {
+
+  describe('pass through', () => {
+    it('default pass through works for responses when no media types are registered', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .get(() => {
+            return 'ok';
+          })
+      );
+
+      await sut.get('/')
+        .set('accept', 'text/plain')
+        .expect(200)
+        .expect('"ok"');
+    });
+
+    it('default pass through works for requests when no media types are registered', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .post(() => {
+            return 'ok';
+          })
+      );
+
+      await sut.post('/')
+        .set('accept', 'text/plain')
+        .expect(200)
+        .expect('"ok"');
+    });
+  });
+
   describe('timeouts', () => {
 
     it('should timeout if exceeds default timeout', async () => {
