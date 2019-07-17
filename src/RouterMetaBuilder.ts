@@ -34,6 +34,7 @@ export interface IHTTPRoute {
     httpQueryParams: string[];
     allowAnonymous: boolean;
     defaultHandler?: RouteHandler;
+    timeout?: string | number;
 }
 
 export class RouterMetaBuilder {
@@ -61,7 +62,7 @@ export class RouterMetaBuilder {
     }
 
     build = (): IHTTPRoute => {
-        const { path, mediaTypeFormatters, verb, queryKeys, allowAnonymous, defaultHandler } = this.state;
+        const { path, mediaTypeFormatters, verb, queryKeys, allowAnonymous, defaultHandler, timeout } = this.state;
 
         return {
             httpVerb: verb,
@@ -69,7 +70,8 @@ export class RouterMetaBuilder {
             mediaTypeFormatters,
             httpQueryParams: queryKeys,
             allowAnonymous,
-            defaultHandler
+            defaultHandler,
+            timeout
         };
     }
 
@@ -95,5 +97,9 @@ export class RouterMetaBuilder {
 
     allowAnonymous = (): RouterMetaBuilder => {
         return new RouterMetaBuilder({ ...this.state, allowAnonymous : true });
+    }
+
+    timeout = (timeout: string | number): RouterMetaBuilder => {
+        return new RouterMetaBuilder({ ...this.state, timeout });
     }
 }

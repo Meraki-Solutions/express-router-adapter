@@ -1,9 +1,5 @@
 import { IHTTPResponse } from './HTTPResponse';
 
-type PartialHTTPError = IHTTPResponse & {
-  message: string;
-};
-
 export class HTTPError extends Error implements IHTTPResponse {
     status: number;
     headers: { [key: string]: string } = {};

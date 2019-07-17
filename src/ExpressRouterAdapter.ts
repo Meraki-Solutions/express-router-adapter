@@ -1,5 +1,6 @@
 // tslint:disable max-classes-per-file no-null-keyword
 import { Application } from 'express';
+import * as timeoutMiddleware from 'connect-timeout';
 import * as properUrlJoin from 'proper-url-join';
 import { HTTPResponse, HTTPError } from './HTTPResponse';
 import { IHTTPRoute } from './RouterMetaBuilder';
@@ -41,6 +42,7 @@ class PassThroughFormatter {
 
 export class ExpressRouterAdapterConfig {
     BASE_PATH: string = '/';
+    TIMEOUT: string | number;
 
     constructor(config: any = {}) {
         Object.assign(
@@ -88,7 +90,7 @@ export class ExpressRouterAdapter {
 
     applyRoutes = (app: Application) => {
         const { log, securityContextProvider } = this;
-        const { BASE_PATH } = this.config;
+        const { BASE_PATH, TIMEOUT: GLOBAL_TIMEOUT } = this.config;
 
         this.routeProvider.getRoutes().forEach(addRoute);
 
@@ -98,18 +100,30 @@ export class ExpressRouterAdapter {
             httpPath,
             mediaTypeFormatters = [],
             httpQueryParams = [],
-            allowAnonymous = false
+            allowAnonymous = false,
+            timeout
         }: IHTTPRoute): void {
             log.debug('adding route', httpVerb, httpPath);
 
             const { requestFormatters, responseFormatters } = prepFormatters({ mediaTypeFormatters });
+            const routeMiddleware = [];
+            const routeTimeout = timeout || GLOBAL_TIMEOUT;
+            if (routeTimeout) {
+                routeMiddleware.push(timeoutMiddleware(routeTimeout, { respond: false }));
+            }
 
-            app[httpVerb](properUrlJoin(BASE_PATH, httpPath), async (req, res, next) => {
+            app[httpVerb](properUrlJoin(BASE_PATH, httpPath), routeMiddleware, async (req, res, next) => {
                 try {
                     let requestLogMessage = `${req.method} ${req.url}`;
 
                     log.info(requestLogMessage);
                     log.debug('headers', req.headers);
+
+                    req.on('timeout', () => next(new HTTPError({
+                        status: 503,
+                        message: `Request timeout of ${routeTimeout} exceeded`,
+                        // TODO: Add an optional code 'timedout'
+                    })));
 
                     const body = ['PUT', 'PATCH', 'POST'].includes(req.method) ? req.body : null;
 
@@ -154,15 +168,16 @@ export class ExpressRouterAdapter {
                     }
                     controllerParams.securityContext = securityContext;
 
-                    const model = await handler(controllerParams);
+                    let model = await handler(controllerParams);
 
                     if (!model) {
-                        res.status(204).send();
-                    } else if (model.isHTTPResponse) {
-                        await handleHTTPResponseModel({ response: res, model });
+                        model = new HTTPResponse({ status: 204 });
                     } else if (!responseFormatter) {
-                        res.set('wl-debug', 'unable to format response').status(204).send();
-                    } else {
+                        model = new HTTPResponse({
+                            status: 204,
+                            headers: { 'wl-debug': 'unable to format response' }
+                        });
+                    } else if (!model.isHTTPResponse) {
                         const formattedModel = await responseFormatter.formatter.formatForResponse(model, { req, res });
                         const { isHTTPResponse = false } = formattedModel;
                         const { mediaType } = responseFormatter.formatter;
@@ -171,7 +186,15 @@ export class ExpressRouterAdapter {
                             formattedModel :
                             new HTTPResponse({ status: 200, body: formattedModel });
 
-                        await handleHTTPResponseModel({ response: res, model: httpResponse, mediaType });
+                        if (mediaType) {
+                            httpResponse.headers['content-type'] = httpResponse.headers['content-type'] || mediaType;
+                        }
+
+                        model = httpResponse;
+                    }
+
+                    if (!req.timedout) {
+                        await handleHTTPResponseModel({ response: res, model });
                     }
 
                     log.info(`${res.statusCode} ${requestLogMessage}`);
@@ -280,12 +303,7 @@ export class ExpressRouterAdapter {
         async function handleHTTPResponseModel({
             response,
             model,
-            mediaType
         }: any): Promise<void> {
-            if (mediaType) {
-                response.set('content-type', mediaType);
-            }
-
             Object.entries(model.headers || {}).forEach(([headerName, headerValue]) => {
                 response.set(headerName, headerValue);
             });

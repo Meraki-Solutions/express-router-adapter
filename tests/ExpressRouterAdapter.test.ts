@@ -20,6 +20,51 @@ const mockLog = {
 };
 
 describe('ExpressRouterAdapter', () => {
+  describe('timeouts', () => {
+
+    it('should timeout if exceeds default timeout', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .get(() => {
+            return new Promise((resolve) => {
+              setTimeout(
+                () => resolve(),
+                501
+              );
+            });
+          })
+      );
+
+      await sut.get('/')
+        .expect(503)
+        .then();
+    });
+
+    it('should timeout if exceeds route timeout', async () => {
+      const sut = buildSuperTestHarnessForRoute(
+        new RouterMetaBuilder()
+          .path('/')
+          .allowAnonymous()
+          .timeout(200)
+          .get(() => {
+            return new Promise((resolve) => {
+              setTimeout(
+                () => resolve(),
+                201
+              );
+            });
+          })
+      );
+
+      await sut.get('/')
+        .expect(503)
+        .then();
+    });
+
+  });
+
   it('when no model is returned, should 204', async () => {
     const sut = buildSuperTestHarnessForRoute(
       new RouterMetaBuilder()
@@ -307,7 +352,9 @@ function buildExpressAppWithRoute(route) {
     type: ['application/json', '+json']
   }));
   const sut = new ExpressRouterAdapter(
-    new ExpressRouterAdapterConfig(),
+    new ExpressRouterAdapterConfig({
+      TIMEOUT: 500
+    }),
     {
       getRoutes: () => [route]
     },

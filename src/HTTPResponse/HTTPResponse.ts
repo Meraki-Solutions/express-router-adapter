@@ -11,7 +11,7 @@ export class HTTPResponse implements IHTTPResponse {
     isHTTPResponse: boolean = true;
     body: any;
 
-    constructor({ status, headers, body }: {
+    constructor({ status, headers = {}, body }: {
         status: number,
         headers?: { [key: string]: string },
         body?: any
