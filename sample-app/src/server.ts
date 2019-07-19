@@ -72,5 +72,5 @@ hotReload({
 });
 
 // Spawn babel watch and log any errors
-spawn('./node_modules/.bin/tsc', ['-w', '-p', 'tsconfig.build.json'])
+spawn('./node_modules/.bin/tsc', ['-w', '-p', 'tsconfig.json'])
   .stderr.pipe(process.stderr);

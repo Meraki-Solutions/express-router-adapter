@@ -2,7 +2,7 @@
   "name": "express-router-adapter-sample-app",
   "version": "0.0.1",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.json",
     "start": "npm run build && DISABLE_PUBLISH_METRICS=1 baseUrl=http://localhost:4000 node build/server.js",
     "test": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register integration-tests/**/*.spec.ts",
     "test:watch": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register --watch --watch-extensions ts integration-tests/**/*.spec.ts"
