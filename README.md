@@ -26,7 +26,7 @@ import {
 
 ## Getting started
 
-ExpressRouterAdapter enhances express, so lets start with a simple express app. This is not a deep dive intro express, see express documentation.
+ExpressRouterAdapter enhances express, so lets start with a simple express app. This is not a deep dive intro express, see [express documentation](https://expressjs.com/).
 
 ```js
 
@@ -40,20 +40,22 @@ app.listen(4000);
 
 ```
 
-Lets install ExpressRouterAdapter and dependncies
+Lets install ExpressRouterAdapter. We are using IOC in our examples, so we are also installing `aurelia-dependency-inject` (and it's dependency `reflect-metadata`), but you could new up all the classes yourself if you choose, in which case you only need to install `@symbiotic/express-router-adapter`.
 
 ```shell
 npm install --save @symbiotic/express-router-adapter aurelia-dependency-injection reflect-metadata
 ```
 
-We are using IOC in our examples but you could new up all the classes yourself if you choose, in which case you would not need `aurelia-dependency-injection` and `reflect-metadata`.
-
-Now we can add ExpressRouterAdapter and refactor to use RouteMetaBuilder
+Now we can add ExpressRouterAdapter and refactor to use RouterMetaBuilder to define our routes.
 
 ```js
 import 'reflect-metadata'; // polyfill for aurelia-dependency-injection
 import express from 'express';
-import { ExpressRouterAdapter, RouterMetaBuilder, RouteProvider } from '@symbiotic/express-router-adapter';
+import {
+  ExpressRouterAdapter,
+  RouterMetaBuilder,
+  RouteProvider
+} from '@symbiotic/express-router-adapter';
 import { Container } from 'aurelia-dependency-injection';
 
 const container = new Container();
@@ -75,8 +77,9 @@ container.registerAlias(PetRouter, RouteProvider);
 const app = express();
 container.get(ExpressRouterAdapter).applyRoutes(app);
 app.listen(4000);
-
 ```
+
+> Note: Routers must implement a `getRoutes` method that returns an array of routes.
 
 ### What if I have more than one router?
 
@@ -103,7 +106,7 @@ class PetRouter{
       new RouterMetaBuilder()
         .path('/pets/:petId')
         .query('petName')
-        .get(({pedId, petName }) => {
+        .get(({ petId, petName }) => {
           // ...
         })
     ];
@@ -121,7 +124,7 @@ class PetRouter{
       new RouterMetaBuilder()
         .path('/pets/:petId')
         .allowAnonymous()
-        .get(({pedId, req }) => {
+        .get(({ petId, req }) => {
           // req.query.petType
         })
     ];
@@ -230,8 +233,10 @@ app.use(err: any, req: any, res: any, next: any): void {
 ```
 
 ## What if I want more control over the status code or headers
+
  ```js
- import { HTTPResponse, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+import { HTTPResponse, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+
 class PetRouter{
   getRoutes(){
     return [
@@ -241,6 +246,9 @@ class PetRouter{
         .put(async ({ petId }) => {
           return new HTTPResponse({
             status: 400,
+            headers: {
+              'x-custom-header': 'My custom header.',
+            },
             body: {
               message: `pet was missing name`,
               code: 123
@@ -253,8 +261,10 @@ class PetRouter{
 ```
 
 You also can throw
+
 ```js
- import { HTTPError, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+import { HTTPError, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+
 class PetRouter{
   getRoutes(){
     return [
@@ -265,6 +275,9 @@ class PetRouter{
           throw new HTTPError({
             message: `pet validation failed`,
             status: 400,
+            headers: {
+              'x-custom-header': 'My custom header.',
+            },
             body: {
               message: `pet was missing name`,
               code: 123
@@ -277,8 +290,10 @@ class PetRouter{
 ```
 
 Which is convenient as you abstract things away, so you can end up with code like
+
 ```js
- import { HTTPError, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+import { RouterMetaBuilder } from '@symbiotic/express-router-adapter';
+
 class PetRouter{
   getRoutes(){
     return [
@@ -348,7 +363,6 @@ class PetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 @autoinject
 export class PetRouter {
   constructor(private petMediaType: PetMediaType){}
@@ -389,7 +403,6 @@ class OldPetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class PetMediaType {
   mediaType: string = 'application/pet+json';
   formatForResponse({ firstName, lastName }: IPet): any {
@@ -397,10 +410,12 @@ class PetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 @autoinject
 export class PetRouter {
-  constructor(private petMediaType: PetMediaType, private oldPetMediaType: OldPetMediaType){}
+  constructor(
+    private petMediaType: PetMediaType,
+    private oldPetMediaType: OldPetMediaType
+  ){}
   pets: IPet[] = [
     { firstName: 'honey', lastName: 'hoguet', internalS3PathToPicture: '...' },
     { firstName: 'poseidon', lastName: 'hoguet', internalS3PathToPicture: '...' }
@@ -427,7 +442,8 @@ curl -H accept:application/json  http://localhost:4000/pets/1
 curl -H accept:application/pet+json  http://localhost:4000/pets/1
 {"firstName":"poseidon","lastName":"hoguet"}
 ```
-We also can re-use our formatter for our aggregates...
+
+We also can re-use our formatter for formatting lists of pets...
 
 ```ts
 import { IHTTPRoute, RouterMetaBuilder } from '@symbiotic/express-router-adapter';
@@ -446,7 +462,6 @@ class OldPetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class PetMediaType {
   mediaType: string = 'application/pet+json';
   formatForResponse({ firstName, lastName }: IPet): any {
@@ -454,7 +469,6 @@ class PetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 @autoinject
 class PetsMediaType {
   constructor(private petMediaType: PetMediaType) {}
@@ -464,7 +478,6 @@ class PetsMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 @autoinject
 export class PetRouter {
   constructor(private petMediaType: PetMediaType, private oldPetMediaType: OldPetMediaType, private petsMediaType: PetsMediaType){}
@@ -498,14 +511,17 @@ Once you add a custom media type, only the media types you specify will work (yo
 
 ```sh
 curl -H 'accept:application/json'  http://localhost:4000/pets/
-{"status":406,"message":"The requested Accept format cannot be satisfied. Try one of the supported media types: application/pets+json"}
+{
+  "status":406,
+  "message":"The requested Accept format cannot be satisfied. Try one of the supported media types: application/pets+json"
+}
 ```
 
-> also of note that this doesn't have to be a breaking change, in fact the way we handled `/pets/:petId'` above demostrated that.
+> also of note that this doesn't have to be a breaking change, in fact the way we handled `/pets/:petId'` above demonstrated that.
 
 > also of note is that your format methods can be async
 
-So far we have been focused on response formatting (which is 90% of the use cases in my experience, but you also can do formatting on the request.
+So far we have been focused on response formatting (which is the most common use-case), but you also can do formatting on the request.
 
 Consider this example
 
@@ -518,7 +534,7 @@ new RouterMetaBuilder()
   })
 ```
 
-What ever is posted will be in body... but maybe I want to whitelist what makes it to my handler.
+What ever is posted will be in body... but maybe I want to whitelist which properties are passed to the handler as the `model` property.
 
 ```ts
 @autoinject
@@ -546,8 +562,6 @@ class postPetMediaType {
 
 Now, `model` is what we'd expect.
 
-> The MediaType architecture could use a v2 to embrace that it is really an adapter for the handler (which use a media type), it is not a media type!
-
 Another example is when we need to make a breaking change...
 
 ```ts
@@ -562,7 +576,6 @@ class OldPetMediaType {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class PetMediaType {
   mediaType: string = 'application/pet+json';
   formatForResponse({ firstName, lastName }: IPet): any {
@@ -607,7 +620,12 @@ Security is going to be different for every application, so we provide a hook fo
 
 import 'reflect-metadata'; // Required by aurelia-dependency-injection
 
-import { ISecurityContext, ISecurityContextProvider, RouteProvider, SecurityContextProvider } from '@symbiotic/express-router-adapter';
+import {
+  ISecurityContext,
+  ISecurityContextProvider,
+  RouteProvider,
+  SecurityContextProvider
+} from '@symbiotic/express-router-adapter';
 import { Container } from 'aurelia-dependency-injection';
 import { ApplicationRouteProvider } from './ApplicationRouteProvider';
 
@@ -617,7 +635,7 @@ class ApplicationSecurityContext implements ISecurityContext {
     return this.principal;
   }
 }
-// tslint:disable-next-line: max-classes-per-file
+
 class ApplicationSecurityContextProvider implements ISecurityContextProvider {
   async getSecurityContext({ req }: any): Promise<ApplicationSecurityContext> {
     const authHeader = req.headers.authorization;
@@ -645,7 +663,7 @@ curl -H 'authorization:jon' -H 'accept:application/pets+json'  http://localhost:
 
 Which of course isn't secure! But it demonstrates the plumbing.
 
-> Of note: you must have a principal on your security context to not be considered anonymous. You will still get a 401 without a principal property. This should be reconsidered in the next version.
+> Of note: you must have a principal on your security context to not be considered anonymous. You will still get a 401 without a principal property.
 
 ## What if I want a base path added?
 TODO
@@ -668,18 +686,23 @@ Yes, check out [./sample-app]()
 ExpressRouterAdapter was born out of necessity as Symbiotic Labs supported multiple clients building out Restful APIs using Node.
 
 We wanted some basics of REST to be easy / out of the box, so that developers can focus on using REST.
- - You should just be able to return a model and get a JSON response. You shouldn't have to think about 200, or JSON formatting it.
- - You should not have to return anything and get 204.
+ - You should just be able to return a model and get a JSON response. You shouldn't have to think about 200 (ok), or JSON formatting it.
+ - You should be able to NOT return a value from a handler and get a 204 (no content)
  - You should be able to use promises / async
  - You should be able to throw errors, to include errors that can drive status codes
- - It should be easy to add a new media type to an existing handler (without needing to mess with the content negotiation or thinking about 406 and 415)
- - You should get a 405 instead of a 404 when hitting a resource that exists but a verb that doesn't
-  > though we haven't gotten to that one yet
+ - It should be easy to add a new media type to an existing handler without needing to mess with the content negotiation or thinking about 406 (not acceptable) and 415 (unsupported media type)
 
 We also were concerned about analysis paralysis with all the great things out there (Express, Koa, Strapi, Hapi, Sails, FeatherJS). We are a lean company that favors something that works an delivers business value quickly, over the perfect solution, eventually.
 
-So we decided that something like RouterMetaBuilder would allow us to describe our rest endpoints in a way that could easily be plugged into any framework, and that this would actually give us the most forward portability (over picking the perfect framework). We chose express to the framework we're using because we have experience with it, it is mature, and it has proven a committment to maintaining a solid low level abstraction (as opposed to bloating to be a better abstraction for some use cases at the cost of bloat and being a bad abstraction for other use cases).
+So we decided that something like RouterMetaBuilder would allow us to describe our rest endpoints in a way that could easily be plugged into any framework, and that this would actually give us the most forward portability (over picking the perfect framework). We chose express to the framework we're using because we have experience with it, it is mature, and it has proven a committment to maintaining a solid low level abstraction (as opposed to trying to handle all possible use cases at the cost of increased complexity, code bloat and being a bad abstraction for the most common use cases).
 
+## Roadmap
+
+ - Reconsider mediaType term for formatters as they are adapters, not media types.
+ - Should ERA 401 if SecurityContextProvider returns a SecurityContext with no principal?
+ - You should get a 405 (method not allowed) instead of a 404 when hitting a resource that exists but a verb that doesn't
+
+## Credits
 
 Made with :heart: by [Symbiotic Labs](https://www.symbioticlabs.io/)
 
