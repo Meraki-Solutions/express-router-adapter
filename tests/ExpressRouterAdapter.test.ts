@@ -3,7 +3,8 @@ import {
   RouterMetaBuilder,
   HTTPResponse,
   ExpressRouterAdapterConfig,
-  SecurityContextProvider
+  SecurityContextProvider,
+  HTTPError
 } from '../src';
 import * as request from 'supertest';
 import * as express from 'express';
@@ -101,18 +102,27 @@ describe('ExpressRouterAdapter', () => {
   });
 
   it('when no model is returned, should 204', async () => {
-    const sut = buildSuperTestHarnessForRoute(
-      new RouterMetaBuilder()
-        .path('/')
-        .allowAnonymous()
-        .get(() => {
-          // intentionally empty
-        })
-    );
+    const baseRouteBuilder = new RouterMetaBuilder()
+      .path('/')
+      .allowAnonymous();
+    const noModelRoutes = [
+      baseRouteBuilder.get(() => {
+        // intentionally empty
+      }),
+      baseRouteBuilder.get(() => {
+        return null;
+      }),
+      baseRouteBuilder.get(() => {
+        return undefined;
+      }),
+    ];
 
-    await sut.get('/')
-      .expect(204)
-      .then();
+    for (const route of noModelRoutes) {
+      const sut = buildSuperTestHarnessForRoute(route);
+      await sut.get('/')
+        .expect(204)
+        .then();
+    }
   });
 
   it('when a body is returned, should 200', async () => {
@@ -384,6 +394,23 @@ describe('ExpressRouterAdapter', () => {
           .send({ hello: 'world' })
           .expect({ hello: 'world' })
           .expect(200);
+  });
+
+  it('can throw HTTPErrors', async () => {
+    const sut = buildSuperTestHarnessForRoute(
+      new RouterMetaBuilder()
+        .path('/')
+        .allowAnonymous()
+        .post(({ body }) => {
+            throw new HTTPError({ status: 400, message: 'validation failed' });
+          }
+        )
+    );
+
+    await sut
+      .post('/')
+        .send({ hello: 'world' })
+        .expect(400);
   });
 
 });
