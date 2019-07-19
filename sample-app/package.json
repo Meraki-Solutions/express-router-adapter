@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start": "npm run build && DISABLE_PUBLISH_METRICS=1 baseUrl=http://localhost:4000 node build/server.js",
-    "test": "ts-mocha -p tsconfig.json integration-tests/**/*.int-spec.ts"
+    "test": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register integration-tests/**/*.spec.ts",
+    "test:watch": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register --watch --watch-extensions ts integration-tests/**/*.spec.ts"
   },
   "dependencies": {
     "@symbiotic/express-router-adapter": "^0.2.3",
@@ -16,16 +17,21 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@types/mocha": "^5.2.6",
+    "assert": "^1.4.1",
+    "express": "^4.0.0",
+    "nyc": "^14.1.1",
+    "supertest": "^4.0.2",
+    "ts-node": "^8.1.0",
+    "typedoc": "^0.14.2",
     "@types/express": "^4.17.0",
     "@types/lodash": "^4.14.88",
-    "@types/mocha": "^5.2.7",
     "@types/node": "^8.10.45",
     "axios": "^0.19.0",
     "chokidar": "^2.1.6",
     "isomorphic-fetch": "^2.2.1",
     "mocha": "^6.1.4",
     "server-destroy": "^1.0.1",
-    "ts-mocha": "^6.0.0",
     "tslint": "^5.16.0",
     "tslint-consistent-codestyle": "^1.15.1",
     "typescript": "^3.4.5"
