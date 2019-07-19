@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./build/",
+    "sourceMap": true,
+    "allowJs": true,
+    "lib": [
+      "es2017",
+      "dom",
+      "es7"
+    ],
+    "allowUnusedLabels": false,
+    "noImplicitReturns": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types"],
+    "types": [ "mocha" ]
+  },
+  "include": [
+    "integration-tests/**/*",
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.js"
+  ]
+}

@@ -1,0 +1,22 @@
+
+root = true
+
+;Other file types
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+;Javascript
+[*.js]
+indent_style = space
+indent_size = 2
+
+;Typescript
+[*.ts]
+indent_style = space
+indent_size = 2
+
+;Markdown configurations
+[*.md]
+trim_trailing_whitespace = false
