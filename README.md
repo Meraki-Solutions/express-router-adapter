@@ -10,6 +10,20 @@ ExpressRouterAdapter is available as a package on NPM for use with a module bund
 npm install --save @symbiotic/express-router-adapter
 ```
 
+The core imports
+```ts
+import {
+  CompositeRouteProvider,
+  RouteProvider,
+  RouterMetaBuilder,
+  HTTPError,
+  HTTPResponse,
+  SecurityContextProvider,
+  ISecurityContext,
+  ExpressRouterAdapter
+} from '@symbiotic/express-router-adapter';
+```
+
 ## Getting started
 
 ExpressRouterAdapter enhances express, so lets start with a simple express app. This is not a deep dive intro express, see express documentation.
@@ -646,6 +660,10 @@ TODO
 ## How do I serialize a response when it isn't json
 TODO
 
+
+## Is there a sample app I can reference?
+
+Yes, check out [./sample-app]()
 
 ## Motivation
 ExpressRouterAdapter was born out of necessity as Symbiotic Labs supported multiple clients building out Restful APIs using Node.
