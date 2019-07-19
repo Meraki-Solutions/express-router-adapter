@@ -66,10 +66,11 @@ describe('ExpressRouterAdapter', () => {
             return new Promise((resolve) => {
               setTimeout(
                 () => resolve(),
-                501
+                61
               );
             });
-          })
+          }),
+        60
       );
 
       await sut.get('/')
@@ -82,12 +83,12 @@ describe('ExpressRouterAdapter', () => {
         new RouterMetaBuilder()
           .path('/')
           .allowAnonymous()
-          .timeout(200)
+          .timeout(50)
           .get(() => {
             return new Promise((resolve) => {
               setTimeout(
                 () => resolve(),
-                201
+                51
               );
             });
           })
@@ -388,18 +389,18 @@ describe('ExpressRouterAdapter', () => {
 
 });
 
-function buildSuperTestHarnessForRoute(route) {
-  return request(buildExpressAppWithRoute(route));
+function buildSuperTestHarnessForRoute(route, timeout = 500) {
+  return request(buildExpressAppWithRoute(route, timeout));
 }
 
-function buildExpressAppWithRoute(route) {
+function buildExpressAppWithRoute(route, timeout) {
   const app = express();
   app.use(express.json({
     type: ['application/json', '+json']
   }));
   const sut = new ExpressRouterAdapter(
     new ExpressRouterAdapterConfig({
-      TIMEOUT: 500
+      TIMEOUT: timeout
     }),
     {
       getRoutes: () => [route]
