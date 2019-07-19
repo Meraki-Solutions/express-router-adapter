@@ -46,7 +46,7 @@ class PetsMediaType {
 // tslint:disable-next-line: max-classes-per-file
 @autoinject
 export class PetRouter {
-  constructor(private petMediaType: PetMediaType, private oldPetMediaType: OldPetMediaType, private petsMediaType: PetsMediaType){}
+  constructor(private petMediaType: PetMediaType, private oldPetMediaType: OldPetMediaType, private petsMediaType: PetsMediaType) {}
   pets: IPet[] = [
     { firstName: 'honey', lastName: 'hoguet', internalS3PathToPicture: '...' },
     { firstName: 'poseidon', lastName: 'hoguet', internalS3PathToPicture: '...' }
