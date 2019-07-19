@@ -65,8 +65,8 @@ export class PetRouter {
         .allowAnonymous()
         .mediaType(this.petsMediaType)
         .post(({ model }) => {
-
-        }),
+          // intentionally empty
+      }),
       new RouterMetaBuilder()
         .path('/pets/:petId')
         .mediaType(this.oldPetMediaType)
