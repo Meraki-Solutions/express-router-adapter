@@ -42,7 +42,6 @@ async function restart(): Promise<void> {
     if (!activeServer) {
       resolve();
     } else {
-      console.log('in here');
       activeServer.wlDispose();
       activeServer.destroy((err) => {
         if (err) {

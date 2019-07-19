@@ -620,7 +620,6 @@ class ApplicationSecurityContext implements ISecurityContext {
 // tslint:disable-next-line: max-classes-per-file
 class ApplicationSecurityContextProvider implements ISecurityContextProvider {
   async getSecurityContext({ req }: any): Promise<ApplicationSecurityContext> {
-    console.log('in here?');
     const authHeader = req.headers.authorization;
     // this is NOT real security
     return new ApplicationSecurityContext(authHeader);
