@@ -141,7 +141,7 @@ class PetRouter{
       new RouterMetaBuilder()
         .path('/pets/:petId')
         .allowAnonymous()
-        .put(({ pedId }) => {
+        .put(({ petId, body }) => {
           // return nothing
         })
     ];
