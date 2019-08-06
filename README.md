@@ -719,6 +719,7 @@ So we decided that something like RouterMetaBuilder would allow us to describe o
  - Reconsider mediaType term for formatters as they are adapters, not media types.
  - Should ERA 401 if SecurityContextProvider returns a SecurityContext with no principal?
  - You should get a 405 (method not allowed) instead of a 404 when hitting a resource that exists but a verb that doesn't
+ - Reconsider requiring formatters to implement both methods
 
 ## Credits
 
