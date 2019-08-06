@@ -39,7 +39,7 @@ class PetsMediaType {
     return pets.map(this.petMediaType.formatForResponse);
   }
   formatFromRequest(): void {
-    throw new Error('not supported');
+    throw new Error('Not implemented');
   }
 }
 

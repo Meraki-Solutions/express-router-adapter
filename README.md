@@ -361,6 +361,9 @@ class PetMediaType {
   formatForResponse({ name }: IPet): any {
     return { name };
   }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
+  }
 }
 
 @autoinject
@@ -401,12 +404,18 @@ class OldPetMediaType {
   formatForResponse({ firstName, lastName }: IPet): any {
     return { name: `${firstName} ${lastName}` };
   }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
+  }
 }
 
 class PetMediaType {
   mediaType: string = 'application/pet+json';
   formatForResponse({ firstName, lastName }: IPet): any {
     return { firstName, lastName };
+  }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
   }
 }
 
@@ -460,12 +469,18 @@ class OldPetMediaType {
   formatForResponse({ firstName, lastName }: IPet): any {
     return { name: `${firstName} ${lastName}` };
   }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
+  }
 }
 
 class PetMediaType {
   mediaType: string = 'application/pet+json';
   formatForResponse({ firstName, lastName }: IPet): any {
     return { firstName, lastName };
+  }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
   }
 }
 
@@ -475,6 +490,9 @@ class PetsMediaType {
   mediaType: string = 'application/pets+json';
   formatForResponse(pets: IPet[]): any {
     return pets.map(this.petMediaType.formatForResponse);
+  }
+  formatFromRequest(): void {
+    throw new Error('Not implemented');
   }
 }
 
@@ -541,8 +559,8 @@ What ever is posted will be in body... but maybe I want to whitelist which prope
 class postPetMediaType {
   constructor(private petMediaType: PetMediaType) {}
   mediaType: string = 'application/pet+json';
-  formatForResponse(pets: IPet[]): any {
-    throw new Error('not supported');
+  formatForResponse(): void {
+    throw new Error('Not implemented');
   }
   formatFromRequest(body: any): any {
     const { firstName, lastName } = body;
