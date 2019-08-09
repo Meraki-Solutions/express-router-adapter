@@ -688,6 +688,7 @@ TODO
 
 ## What if I need custom timeouts?
 TODO
+Meanwhile - (see `describe('timeouts'` in `tests/ExpressRouterAdapter.test.ts`), and we'd welcome a PR to build out this section!
 
 ## How can I provide my own logger?
 TODO
