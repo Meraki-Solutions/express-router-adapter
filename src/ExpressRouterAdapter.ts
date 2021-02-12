@@ -40,6 +40,11 @@ class PassThroughFormatter {
     }
 }
 
+/**
+ * ExpressRouterAdapterConfig provides configuration for route handling
+ * @property  BASE_PATH  The route's base path. Defaults to '/'.
+ * @property  TIMEOUT    The number of seconds till the route times outs. Defaults to 29 seconds
+ */
 export class ExpressRouterAdapterConfig {
     BASE_PATH: string = '/';
     TIMEOUT: string | number = '29s';
